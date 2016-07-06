@@ -5,6 +5,7 @@ namespace spec\Pim\Component\Connector\Writer\File\Xlsx;
 use Akeneo\Component\Batch\Job\JobParameters;
 use Akeneo\Component\Batch\Model\StepExecution;
 use PhpSpec\ObjectBehavior;
+use Pim\Component\Connector\ArrayConverter\ArrayConverterInterface;
 use Pim\Component\Connector\Writer\File\FilePathResolverInterface;
 use Pim\Component\Connector\Writer\File\FlatItemBufferFlusher;
 use Pim\Component\Connector\Writer\File\FlatItemBuffer;
@@ -13,11 +14,12 @@ use Prophecy\Argument;
 class WriterSpec extends ObjectBehavior
 {
     function let(
+        ArrayConverterInterface $arrayConverter,
         FilePathResolverInterface $filePathResolver,
         FlatItemBuffer $flatRowBuffer,
         FlatItemBufferFlusher $flusher
     ) {
-        $this->beConstructedWith($filePathResolver, $flatRowBuffer, $flusher);
+        $this->beConstructedWith($arrayConverter, $filePathResolver, $flatRowBuffer, $flusher);
 
         $filePathResolver
             ->resolve(Argument::any(), Argument::type('array'))
@@ -40,6 +42,7 @@ class WriterSpec extends ObjectBehavior
     }
 
     function it_prepares_items_to_write(
+        $arrayConverter,
         $flatRowBuffer,
         StepExecution $stepExecution,
         JobParameters $jobParameters
@@ -52,18 +55,38 @@ class WriterSpec extends ObjectBehavior
 
         $groups = [
             [
-                'code'        => 'promotion',
-                'type'        => 'RELATED',
-                'label-en_US' => 'Promotion',
-                'label-de_DE' => 'Förderung'
+                'code'   => 'promotion',
+                'type'   => 'RELATED',
+                'labels' => ['en_US' => 'Promotion', 'de_DE' => 'Förderung']
             ],
             [
-                'code'        => 'related',
-                'type'        => 'RELATED',
-                'label-en_US' => 'Related',
-                'label-de_DE' => 'Verbunden'
+                'code'   => 'related',
+                'type'   => 'RELATED',
+                'labels' => ['en_US' => 'Related', 'de_DE' => 'Verbunden']
             ]
         ];
+
+        $arrayConverter->convert([
+            'code'   => 'promotion',
+            'type'   => 'RELATED',
+            'labels' => ['en_US' => 'Promotion', 'de_DE' => 'Förderung']
+        ])->willReturn([
+            'code'        => 'promotion',
+            'type'        => 'RELATED',
+            'label-en_US' => 'Promotion',
+            'label-de_DE' => 'Förderung'
+        ]);
+
+        $arrayConverter->convert([
+            'code'   => 'related',
+            'type'   => 'RELATED',
+            'labels' => ['en_US' => 'Related', 'de_DE' => 'Verbunden']
+        ])->willReturn([
+            'code'        => 'related',
+            'type'        => 'RELATED',
+            'label-en_US' => 'Related',
+            'label-de_DE' => 'Verbunden'
+        ]);
 
         $flatRowBuffer->write(
             [

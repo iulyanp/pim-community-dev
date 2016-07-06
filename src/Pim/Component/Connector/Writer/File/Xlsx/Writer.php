@@ -8,6 +8,8 @@ use Pim\Component\Connector\Writer\File\FilePathResolverInterface;
 use Pim\Component\Connector\Writer\File\FlatItemBuffer;
 use Pim\Component\Connector\Writer\File\FlatItemBufferFlusher;
 
+use Pim\Component\Connector\ArrayConverter\ArrayConverterInterface;
+
 /**
  * Write simple data into a XLSX file on the local filesystem
  *
@@ -17,6 +19,9 @@ use Pim\Component\Connector\Writer\File\FlatItemBufferFlusher;
  */
 class Writer extends AbstractFileWriter implements ArchivableWriterInterface
 {
+    /** @var ArrayConverterInterface */
+    protected $arrayConverter;
+
     /** @var FlatItemBuffer */
     protected $flatRowBuffer;
 
@@ -27,17 +32,20 @@ class Writer extends AbstractFileWriter implements ArchivableWriterInterface
     protected $writtenFiles;
 
     /**
+     * @param ArrayConverterInterface   $arrayConverter
      * @param FilePathResolverInterface $filePathResolver
      * @param FlatItemBuffer            $flatRowBuffer
      * @param FlatItemBufferFlusher     $flusher
      */
     public function __construct(
+        ArrayConverterInterface $arrayConverter,
         FilePathResolverInterface $filePathResolver,
         FlatItemBuffer $flatRowBuffer,
         FlatItemBufferFlusher $flusher
     ) {
         parent::__construct($filePathResolver);
 
+        $this->arrayConverter = $arrayConverter;
         $this->flatRowBuffer = $flatRowBuffer;
         $this->flusher       = $flusher;
         $this->writtenFiles  = [];
@@ -53,9 +61,14 @@ class Writer extends AbstractFileWriter implements ArchivableWriterInterface
             $this->localFs->mkdir($exportFolder);
         }
 
+        $flatItems = [];
+        foreach ($items as $item) {
+            $flatItems[] = $this->arrayConverter->convert($item);
+        }
+
         $parameters = $this->stepExecution->getJobParameters();
         $withHeader = $parameters->get('withHeader');
-        $this->flatRowBuffer->write($items, $withHeader);
+        $this->flatRowBuffer->write($flatItems, $withHeader);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Pim\Component\Connector\Writer\File\Csv;
 
+use Pim\Component\Connector\ArrayConverter\ArrayConverterInterface;
 use Pim\Component\Connector\Writer\File\AbstractFileWriter;
 use Pim\Component\Connector\Writer\File\ArchivableWriterInterface;
 use Pim\Component\Connector\Writer\File\FilePathResolverInterface;
@@ -17,6 +18,9 @@ use Pim\Component\Connector\Writer\File\FlatItemBufferFlusher;
  */
 class Writer extends AbstractFileWriter implements ArchivableWriterInterface
 {
+    /** @var ArrayConverterInterface */
+    protected $arrayConverter;
+
     /** @var FlatItemBuffer */
     protected $flatRowBuffer;
 
@@ -30,17 +34,20 @@ class Writer extends AbstractFileWriter implements ArchivableWriterInterface
     protected $writtenFiles = [];
 
     /**
+     * @param ArrayConverterInterface   $arrayConverter
      * @param FilePathResolverInterface $filePathResolver
      * @param FlatItemBuffer            $flatRowBuffer
      * @param FlatItemBufferFlusher     $flusher
      */
     public function __construct(
+        ArrayConverterInterface $arrayConverter,
         FilePathResolverInterface $filePathResolver,
         FlatItemBuffer $flatRowBuffer,
         FlatItemBufferFlusher $flusher
     ) {
         parent::__construct($filePathResolver);
 
+        $this->arrayConverter = $arrayConverter;
         $this->flatRowBuffer = $flatRowBuffer;
         $this->flusher = $flusher;
     }
@@ -63,13 +70,18 @@ class Writer extends AbstractFileWriter implements ArchivableWriterInterface
             $this->localFs->mkdir($exportDirectory);
         }
 
+        $flatItems = [];
+        foreach ($items as $item) {
+            $flatItems[] = $this->arrayConverter->convert($item);
+        }
+
         $parameters = $this->stepExecution->getJobParameters();
         $isWithHeader = $parameters->get('withHeader');
-        $this->flatRowBuffer->write($items, $isWithHeader);
+        $this->flatRowBuffer->write($flatItems, $isWithHeader);
     }
 
     /**
-     * Flush items into a csv file
+     * {@inheritdoc}
      */
     public function flush()
     {

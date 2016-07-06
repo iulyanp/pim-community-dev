@@ -6,6 +6,7 @@ use Akeneo\Component\Batch\Job\JobParameters;
 use Akeneo\Component\Batch\Model\StepExecution;
 use Akeneo\Component\Buffer\BufferInterface;
 use PhpSpec\ObjectBehavior;
+use Pim\Component\Connector\ArrayConverter\ArrayConverterInterface;
 use Pim\Component\Connector\Writer\File\FilePathResolverInterface;
 use Pim\Component\Connector\Writer\File\FlatItemBuffer;
 use Pim\Component\Connector\Writer\File\FlatItemBufferFlusher;
@@ -19,11 +20,12 @@ class WriterSpec extends ObjectBehavior
     }
 
     function let(
+        ArrayConverterInterface $arrayConverter,
         FilePathResolverInterface $filePathResolver,
         FlatItemBuffer $flatRowBuffer,
         FlatItemBufferFlusher $flusher
     ) {
-        $this->beConstructedWith($filePathResolver, $flatRowBuffer, $flusher);
+        $this->beConstructedWith($arrayConverter, $filePathResolver, $flatRowBuffer, $flusher);
 
         $filePathResolver->resolve(Argument::any(), Argument::type('array'))
             ->willReturn('/tmp/export/export.csv');
@@ -40,6 +42,7 @@ class WriterSpec extends ObjectBehavior
     }
 
     function it_prepares_the_export(
+        $arrayConverter,
         $flatRowBuffer,
         StepExecution $stepExecution,
         JobParameters $jobParameters
@@ -50,20 +53,60 @@ class WriterSpec extends ObjectBehavior
         $jobParameters->has('mainContext')->willReturn(false);
         $jobParameters->get('withHeader')->willReturn(true);
 
-        $items = [
+        $groups = [
             [
-                'id' => 123,
-                'family' => 12,
+                'code'   => 'promotion',
+                'type'   => 'RELATED',
+                'labels' => ['en_US' => 'Promotion', 'de_DE' => 'Förderung']
             ],
             [
-                'id' => 165,
-                'family' => 45,
-            ],
+                'code'   => 'related',
+                'type'   => 'RELATED',
+                'labels' => ['en_US' => 'Related', 'de_DE' => 'Verbunden']
+            ]
         ];
 
-        $flatRowBuffer->write($items, true)->shouldBeCalled();
+        $arrayConverter->convert([
+            'code'   => 'promotion',
+            'type'   => 'RELATED',
+            'labels' => ['en_US' => 'Promotion', 'de_DE' => 'Förderung']
+        ])->willReturn([
+            'code'        => 'promotion',
+            'type'        => 'RELATED',
+            'label-en_US' => 'Promotion',
+            'label-de_DE' => 'Förderung'
+        ]);
 
-        $this->write($items);
+        $arrayConverter->convert([
+            'code'   => 'related',
+            'type'   => 'RELATED',
+            'labels' => ['en_US' => 'Related', 'de_DE' => 'Verbunden']
+        ])->willReturn([
+            'code'        => 'related',
+            'type'        => 'RELATED',
+            'label-en_US' => 'Related',
+            'label-de_DE' => 'Verbunden'
+        ]);
+
+        $flatRowBuffer->write(
+            [
+                [
+                    'code'        => 'promotion',
+                    'type'        => 'RELATED',
+                    'label-en_US' => 'Promotion',
+                    'label-de_DE' => 'Förderung'
+                ],
+                [
+                    'code'        => 'related',
+                    'type'        => 'RELATED',
+                    'label-en_US' => 'Related',
+                    'label-de_DE' => 'Verbunden'
+                ]
+            ],
+            true
+        )->shouldBeCalled();
+
+        $this->write($groups);
     }
 
     function it_writes_the_csv_file(
