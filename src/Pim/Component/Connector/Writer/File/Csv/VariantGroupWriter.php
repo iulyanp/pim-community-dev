@@ -2,6 +2,8 @@
 
 namespace Pim\Component\Connector\Writer\File\Csv;
 
+use Akeneo\Component\Batch\Item\ItemWriterInterface;
+use Akeneo\Component\Buffer\BufferFactory;
 use Pim\Component\Connector\Writer\File\AbstractFileWriter;
 use Pim\Component\Connector\Writer\File\ArchivableWriterInterface;
 use Pim\Component\Connector\Writer\File\BulkFileExporter;
@@ -16,7 +18,7 @@ use Pim\Component\Connector\Writer\File\FlatItemBufferFlusher;
  * @copyright 2016 Akeneo SAS (http://www.akeneo.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class VariantGroupWriter extends AbstractFileWriter implements ArchivableWriterInterface
+class VariantGroupWriter extends AbstractFileWriter implements ItemWriterInterface, ArchivableWriterInterface
 {
     /** @var FlatItemBuffer */
     protected $flatRowBuffer;
@@ -30,23 +32,36 @@ class VariantGroupWriter extends AbstractFileWriter implements ArchivableWriterI
     /** @var array */
     protected $writtenFiles = [];
 
+    /** @var BufferFactory */
+    protected $bufferFactory;
+
     /**
      * @param FilePathResolverInterface $filePathResolver
-     * @param FlatItemBuffer            $flatRowBuffer
+     * @param BufferFactory             $bufferFactory
      * @param BulkFileExporter          $fileExporter
      * @param FlatItemBufferFlusher     $flusher
      */
     public function __construct(
         FilePathResolverInterface $filePathResolver,
-        FlatItemBuffer $flatRowBuffer,
+        BufferFactory $bufferFactory,
         BulkFileExporter $fileExporter,
         FlatItemBufferFlusher $flusher
     ) {
         parent::__construct($filePathResolver);
 
-        $this->flatRowBuffer = $flatRowBuffer;
+        $this->bufferFactory = $bufferFactory;
         $this->fileExporter = $fileExporter;
         $this->flusher = $flusher;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function initialize()
+    {
+        if (null === $this->flatRowBuffer) {
+            $this->flatRowBuffer = $this->bufferFactory->create();
+        }
     }
 
     /**
@@ -66,8 +81,8 @@ class VariantGroupWriter extends AbstractFileWriter implements ArchivableWriterI
         }
 
         $parameters = $this->stepExecution->getJobParameters();
-        $this->flatRowBuffer->write($variantGroups, $parameters->get('withHeader'));
-
+        $options['isWithHeader'] = $parameters->get('withHeader');
+        $this->flatRowBuffer->write($variantGroups, $options);
         $this->fileExporter->exportAll($media, $exportDirectory);
 
         foreach ($this->fileExporter->getCopiedMedia() as $copy) {

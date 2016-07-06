@@ -2,6 +2,8 @@
 
 namespace Pim\Component\Connector\Writer\File\Csv;
 
+use Akeneo\Component\Batch\Item\ItemWriterInterface;
+use Akeneo\Component\Buffer\BufferFactory;
 use Pim\Component\Connector\Writer\File\AbstractFileWriter;
 use Pim\Component\Connector\Writer\File\ArchivableWriterInterface;
 use Pim\Component\Connector\Writer\File\BulkFileExporter;
@@ -16,7 +18,7 @@ use Pim\Component\Connector\Writer\File\FlatItemBufferFlusher;
  * @copyright 2015 Akeneo SAS (http://www.akeneo.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class ProductWriter extends AbstractFileWriter implements ArchivableWriterInterface
+class ProductWriter extends AbstractFileWriter implements ItemWriterInterface, ArchivableWriterInterface
 {
     /** @var FlatItemBuffer */
     protected $flatRowBuffer;
@@ -27,26 +29,39 @@ class ProductWriter extends AbstractFileWriter implements ArchivableWriterInterf
     /** @var FlatItemBufferFlusher */
     protected $flusher;
 
+    /** @var BufferFactory */
+    protected $bufferFactory;
+
     /** @var array */
     protected $writtenFiles = [];
 
     /**
      * @param FilePathResolverInterface $filePathResolver
-     * @param FlatItemBuffer            $flatRowBuffer
+     * @param BufferFactory             $bufferFactory
      * @param BulkFileExporter          $mediaCopier
      * @param FlatItemBufferFlusher     $flusher
      */
     public function __construct(
         FilePathResolverInterface $filePathResolver,
-        FlatItemBuffer $flatRowBuffer,
+        BufferFactory $bufferFactory,
         BulkFileExporter $mediaCopier,
         FlatItemBufferFlusher $flusher
     ) {
         parent::__construct($filePathResolver);
 
-        $this->flatRowBuffer = $flatRowBuffer;
+        $this->bufferFactory = $bufferFactory;
         $this->mediaCopier = $mediaCopier;
         $this->flusher = $flusher;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function initialize()
+    {
+        if (null === $this->flatRowBuffer) {
+            $this->flatRowBuffer = $this->bufferFactory->create();
+        }
     }
 
     /**
@@ -61,9 +76,8 @@ class ProductWriter extends AbstractFileWriter implements ArchivableWriterInterf
         }
 
         $parameters = $this->stepExecution->getJobParameters();
-        $this->flatRowBuffer->write($products, $parameters->get('withHeader'));
-
-        $parameters = $this->stepExecution->getJobParameters();
+        $options['isWithHeader'] = $parameters->get('withHeader');
+        $this->flatRowBuffer->write($products, $options);
 
         $exportDirectory = dirname($this->getPath());
         if (!is_dir($exportDirectory)) {

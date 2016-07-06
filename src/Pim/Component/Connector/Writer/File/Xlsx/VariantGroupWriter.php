@@ -3,6 +3,7 @@
 namespace Pim\Component\Connector\Writer\File\Xlsx;
 
 use Akeneo\Component\Batch\Item\ItemWriterInterface;
+use Akeneo\Component\Buffer\BufferFactory;
 use Pim\Component\Connector\Writer\File\AbstractFileWriter;
 use Pim\Component\Connector\Writer\File\ArchivableWriterInterface;
 use Pim\Component\Connector\Writer\File\BulkFileExporter;
@@ -31,24 +32,37 @@ class VariantGroupWriter extends AbstractFileWriter implements ItemWriterInterfa
     /** @var array */
     protected $writtenFiles;
 
+    /** @var BufferFactory */
+    protected $bufferFactory;
+
     /**
      * @param FilePathResolverInterface $filePathResolver
-     * @param FlatItemBuffer            $flatRowBuffer
+     * @param BufferFactory             $bufferFactory
      * @param BulkFileExporter          $fileExporter
      * @param FlatItemBufferFlusher     $flusher
      */
     public function __construct(
         FilePathResolverInterface $filePathResolver,
-        FlatItemBuffer $flatRowBuffer,
+        BufferFactory $bufferFactory,
         BulkFileExporter $fileExporter,
         FlatItemBufferFlusher $flusher
     ) {
         parent::__construct($filePathResolver);
 
-        $this->flatRowBuffer = $flatRowBuffer;
+        $this->bufferFactory = $bufferFactory;
         $this->fileExporter  = $fileExporter;
         $this->flusher       = $flusher;
         $this->writtenFiles  = [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function initialize()
+    {
+        if (null === $this->flatRowBuffer) {
+            $this->flatRowBuffer = $this->bufferFactory->create();
+        }
     }
 
     /**
@@ -68,8 +82,8 @@ class VariantGroupWriter extends AbstractFileWriter implements ItemWriterInterfa
         }
 
         $parameters = $this->stepExecution->getJobParameters();
-        $withHeader = $parameters->get('withHeader');
-        $this->flatRowBuffer->write($variantGroups, $withHeader);
+        $options['isWithHeader'] = $parameters->get('withHeader');
+        $this->flatRowBuffer->write($variantGroups, $options);
         $this->fileExporter->exportAll($media, $exportDirectory);
 
         foreach ($this->fileExporter->getCopiedMedia() as $copy) {

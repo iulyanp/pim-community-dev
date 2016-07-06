@@ -14,9 +14,6 @@ use Akeneo\Component\Buffer\JSONFileBuffer;
  */
 class FlatItemBuffer extends JSONFileBuffer implements BufferInterface, \Countable
 {
-    /** @var BufferInterface */
-    protected $buffer;
-
     /** @var array */
     protected $headers = [];
 
@@ -26,21 +23,20 @@ class FlatItemBuffer extends JSONFileBuffer implements BufferInterface, \Countab
     public function __construct()
     {
         parent::__construct();
-
         $this->count = 0;
     }
 
     /**
-     * Write an item into the buffer
-     *
-     * @param array $items
+     * {@inheritdoc}
      */
-    public function write($items)
+    public function write($items, array $options = [])
     {
         foreach ($items as $item) {
-            $this->addToHeaders(array_keys($item));
+            if (isset($options['isWithHeader']) && $options['isWithHeader']) {
+                $this->addToHeaders(array_keys($item));
+            }
 
-            parent::write($item);
+            parent::write($item, $options);
             $this->count++;
         }
     }
