@@ -76,3 +76,16 @@ Feature: Filter products
     Then I should see the available filters sku, family, enabled
     And I should see the available filters name, image, info
     And I should not see the available filters description
+
+  @jira https://akeneo.atlassian.net/browse/PIM-5767
+  Scenario: Successfully filter products
+    Given the following products:
+      | sku          |
+      | les-paul     |
+      | telecaster   |
+      | stratocaster |
+    And I am on the products page
+    And I should be able to use the following filters:
+      | filter | operator    | value                  | result                    |
+      | sku    | is equal to | les-paul               | les-paul                  |
+      | sku    | in list     | les-paul, stratocaster | les-paul and stratocaster |
