@@ -332,7 +332,7 @@ class Grid extends Index
     {
         $pagination = $this
             ->getElement('Grid toolbar')
-            ->find('css', 'div label.dib:contains("([0-9]* record")');
+            ->find('css', 'div label.dib:contains("record")');
 
         /**
          * If pagination not found or is empty, it actually count rows
@@ -341,7 +341,7 @@ class Grid extends Index
          * If there is no toolbar count, this method
          * should even not be called or should raise a not found exception.
          */
-        if (!$pagination || !$pagination->getText()) {
+        if (!$pagination || false !== strstr($pagination->getText(), 'null')) {
             return $this->countRows();
         }
 
