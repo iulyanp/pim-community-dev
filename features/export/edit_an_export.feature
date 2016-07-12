@@ -32,8 +32,8 @@ Feature: Edit an export
     Then I should see the filters enabled, completeness, updated and family.code
     And I fill in the following information:
       | Channel      | Tablet                               |
-    Then I filter by "enabled" with operator "=" and value "false"
-    Then I filter by "family.code" with operator "In list" and value "Boots"
+    Then I filter by "enabled" with operator "" and value "Disabled"
+    Then I filter by "family.code" with operator "" and value "Boots"
     Then I filter by "completeness" with operator "Not complete on all selected locales" and value ""
     When I press the "Save" button
     Then I should see the text "File path file.csv"
