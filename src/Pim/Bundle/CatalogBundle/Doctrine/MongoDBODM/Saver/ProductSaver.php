@@ -105,6 +105,7 @@ class ProductSaver extends BaseProductSaver
             } else {
                 $productsToUpdate[] = $product;
             }
+            $this->eventDispatcher->dispatch(StorageEvents::PRE_SAVE, new GenericEvent($product, $options));
         }
 
         $insertDocs = $this->getDocsFromProducts($productsToInsert);
@@ -126,7 +127,9 @@ class ProductSaver extends BaseProductSaver
 
         $versions = $this->bulkVersionBuilder->buildVersions($products);
         $this->versionSaver->saveAll($versions);
-
+        foreach ($products as $product) {
+            $this->eventDispatcher->dispatch(StorageEvents::POST_SAVE, new GenericEvent($product, $options));
+        }
         $this->eventDispatcher->dispatch(StorageEvents::POST_SAVE_ALL, new GenericEvent($products, $options));
     }
 
