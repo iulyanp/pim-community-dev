@@ -7,14 +7,13 @@ define([
         'oro/translator'
     ],
     function (
-
         _,
         BaseForm,
         Grid,
         __
     ) {
         return BaseForm.extend({
-            className: 'tabbable tabs-left history',
+            className: 'AknTabContainer-content tabbable tabs-left history',
             historyGrid: null,
 
             /**
@@ -22,6 +21,7 @@ define([
              */
             initialize: function (meta) {
                 this.config = _.extend({}, meta.config);
+                this.config.modelDependent = false;
             },
 
             /**
@@ -29,7 +29,7 @@ define([
              */
             configure: function () {
                 this.trigger('tab:register', {
-                    code: this.code,
+                    code: this.config.tabCode ? this.config.tabCode : this.code,
                     label: __(this.config.title)
                 });
 

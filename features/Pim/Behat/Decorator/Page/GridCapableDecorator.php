@@ -20,10 +20,13 @@ class GridCapableDecorator extends ElementDecorator
 
     /** @var array Selectors to ease find */
     protected $selectors = [
-        'Dialog grid'   => '.modal',
-        'Grid'          => 'table.grid',
-        'View selector' => '.grid-view-selector .select2-container',
-        'Save button'   => '.save-button [data-action="save"]:not(.hide)'
+        'Dialog grid'        => '.modal',
+        'Grid'               => 'table.grid',
+        'View selector'      => '.grid-view-selector .select2-container',
+        'View type switcher' => '.grid-view-selector .view-selector-type-switcher',
+        'Create view button' => '.grid-view-selector .create-button .create',
+        'Save view button'   => '.grid-view-selector .save-button .save',
+        'Remove view button' => '.grid-view-selector .remove-button .remove',
     ];
 
     /** @var array */
@@ -44,22 +47,54 @@ class GridCapableDecorator extends ElementDecorator
     public function getViewSelector()
     {
         $viewSelector = $this->spin(function () {
-            return $this->find('css', $this->selectors['View selector']);
+            $result = $this->find('css', $this->selectors['View selector']);
+            if ((null === $result) || !$result->isVisible()) {
+                return false;
+            }
+
+            return $result;
         }, 'View selector not found.');
 
         return $this->decorate($viewSelector, $this->viewSelectorDecorators);
     }
 
     /**
-     * @param string $button
+     * This method opens the view selector and ensure the drop is displayed
+     *
+     * @throws TimeoutException
      */
-    public function clickCreateOnButton($button)
+    public function openViewSelector()
     {
-        $button = $this->spin(function () use ($button) {
-            return $this->find('css', sprintf('.create-button:contains("%s")', $button));
-        }, sprintf('Button "%s" not found.', $button));
+        $viewSelector = $this->getViewSelector();
+        $this->spin(function () use ($viewSelector) {
+            $result = $this->find('css', '.select2-drop.grid-view-selector');
+            if ((null === $result) || !$result->isVisible()) {
+                $viewSelector->find('css', '.select2-arrow')->click();
 
-        $button->click();
+                return false;
+            }
+
+            return true;
+        }, 'Could not open view selector');
+    }
+
+    public function clickOnCreateViewButton()
+    {
+        $selector = $this->selectors['Create view button'];
+
+        $button = $this->spin(function () use ($selector) {
+            return $this->find('css', $selector);
+        }, sprintf('Create view button not found (%s).', $selector));
+
+        $this->spin(function () use ($button) {
+            $button->click();
+            $modalHeader = $this->find(
+                'css',
+                '.modal-header:contains("Choose a label for the view")'
+            );
+
+            return null !== $modalHeader;
+        }, 'Impossible to open the create view popin');
     }
 
     /**
@@ -77,35 +112,27 @@ class GridCapableDecorator extends ElementDecorator
      */
     public function saveView()
     {
-        $viewSelector = $this->getViewSelector()->getParent();
+        $selector = $this->selectors['Save view button'];
 
-        $saveButton = $this->spin(function () use ($viewSelector) {
-            return $viewSelector->find('css', $this->selectors['Save button']);
-        }, 'Save button not found.');
+        $button = $this->spin(function () use ($selector) {
+            return $this->find('css', $selector);
+        }, sprintf('Save view button not found (%s).', $selector));
 
-        $saveButton->click();
+        $button->click();
     }
 
     /**
-     * Remove the datagrid view with the given $viewLabel
-     *
-     * @param $viewLabel
-     *
-     * @throws TimeoutException
+     * Remove the current view
      */
-    public function removeView($viewLabel)
+    public function removeView()
     {
-        $widget = $this->getViewSelector()->getWidget();
+        $selector = $this->selectors['Remove view button'];
 
-        $row = $this->spin(function () use ($widget, $viewLabel) {
-            return $widget->find('css', sprintf('.select2-result-label:contains("%s")', $viewLabel));
-        }, sprintf('Row "%s" in view selector not found.', $viewLabel));
+        $button = $this->spin(function () use ($selector) {
+            return $this->find('css', $selector);
+        }, sprintf('Remove view button not found (%s).', $selector));
 
-        $deleteButton = $this->spin(function () use ($row) {
-            return $this->find('css', '[data-action="prompt-deletion"]');
-        }, sprintf('Delete button not found on row "%s"', $viewLabel));
-
-        $deleteButton->click();
+        $button->click();
     }
 
     /**
@@ -128,5 +155,43 @@ class GridCapableDecorator extends ElementDecorator
         );
 
         return $this->decorate($grid->getParent()->getParent()->getParent(), $this->gridDecorators);
+    }
+
+    /**
+     * @param string $type
+     *
+     * @throws TimeoutException
+     */
+    public function switchViewType($type)
+    {
+        $selector = $this->selectors['View type switcher'];
+
+        $viewTypeSwitcher = $this->spin(function () use ($selector) {
+            return $this->find('css', $selector);
+        }, 'Cannot find the View Type Switcher.');
+
+        $viewTypeSwitcher->click();
+
+        $viewType = $this->spin(function () use ($type) {
+            return $this->find('css', sprintf('.view-type-item[title="%s"]', $type));
+        }, sprintf('Cannot find element in the View Type Switcher dropdown with name "%s".', $type));
+
+        $viewType->click();
+    }
+
+    /**
+     * @throws TimeoutException
+     *
+     * @return string
+     */
+    public function getCurrentViewType()
+    {
+        $widget = $this->getViewSelector()->getWidget();
+
+        $viewTypeSwitcher = $this->spin(function () use ($widget) {
+            return $widget->find('css', '.view-selector-type-switcher');
+        }, 'Cannot find the View Type Switcher in the View Selector.');
+
+        return $viewTypeSwitcher->getText();
     }
 }

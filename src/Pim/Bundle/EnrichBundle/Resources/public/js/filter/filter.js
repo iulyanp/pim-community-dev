@@ -16,7 +16,7 @@ define([
     filterTemplate
 ) {
     return BaseForm.extend({
-        className: 'control-group filter-item',
+        className: 'AknFieldContainer control-group filter-item',
         elements: {},
         editable: true,
         removable: false,
@@ -49,7 +49,7 @@ define([
         },
 
         /**
-         * Sets the filter code  (code: 'categories', field: 'categories.code')
+         * Sets the filter code  (code: 'categories', field: 'categories')
          *
          * @param {string} code
          */
@@ -58,7 +58,7 @@ define([
         },
 
         /**
-         * Gets the filter code (code: 'categories', field: 'categories.code')
+         * Gets the filter code (code: 'categories', field: 'categories')
          *
          * @return {string}
          */
@@ -67,7 +67,7 @@ define([
         },
 
         /**
-         * Sets the field code on which this filter operates. (code: 'categories', field: 'categories.code')
+         * Sets the field code on which this filter operates. (code: 'categories', field: 'categories')
          *
          * @param {string} field
          */
@@ -79,7 +79,7 @@ define([
         },
 
         /**
-         * Gets the field code on which this filter operates.  (code: 'categories', field: 'categories.code')
+         * Gets the field code on which this filter operates.  (code: 'categories', field: 'categories')
          *
          * @return {string}
          */
@@ -222,7 +222,7 @@ define([
 
                     this.$el.html(this.filterTemplate(templateContext));
                     this.$('.remove').on('click', this.removeFilter.bind(this));
-                    this.$('.filter-input').append(this.renderInput(templateContext));
+                    this.$('.filter-input').replaceWith(this.renderInput(templateContext));
 
                     this.renderElements();
                     this.postRender(templateContext);

@@ -1168,7 +1168,7 @@ var BooleanCellEditor = Backgrid.BooleanCellEditor = CellEditor.extend({
 var BooleanCell = Backgrid.BooleanCell = Cell.extend({
 
   /** @property */
-  className: "AknGrid-bodyCell boolean-cell",
+  className: "AknGrid-bodyCell AknGrid-bodyCell--tight boolean-cell",
 
   /** @property */
   editor: BooleanCellEditor,
@@ -1561,6 +1561,7 @@ var Row = Backgrid.Row = Backbone.View.extend({
 
   /** @property */
   tagName: "tr",
+  className: 'AknGrid-bodyRow',
 
   requiredOptions: ["columns", "model"],
 
@@ -1686,6 +1687,7 @@ var EmptyRow = Backgrid.EmptyRow = Backbone.View.extend({
 
   /** @property */
   tagName: "tr",
+  className: 'AknGrid-bodyRow',
 
   /** @property */
   emptyText: null,

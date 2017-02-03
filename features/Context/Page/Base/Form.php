@@ -7,6 +7,7 @@ use Behat\Mink\Element\ElementInterface;
 use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Exception\ElementNotFoundException;
 use Behat\Mink\Exception\ExpectationException;
+use Context\Traits\ClosestTrait;
 
 /**
  * Basic form page
@@ -17,6 +18,8 @@ use Behat\Mink\Exception\ExpectationException;
  */
 class Form extends Base
 {
+    use ClosestTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -28,8 +31,8 @@ class Form extends Base
             [
                 'Dialog'                          => ['css' => 'div.modal'],
                 'Associations list'               => ['css' => '.associations-list'],
-                'Groups'                          => ['css' => '.tab-groups'],
-                'Form Groups'                     => ['css' => '.group-selector'],
+                'Groups'                          => ['css' => '.tab-groups, .AknVerticalNavtab'],
+                'Group'                           => ['css' => '.AknVerticalNavtab-link:contains("%s")'],
                 'Validation errors'               => ['css' => '.validation-tooltip'],
                 'Available attributes form'       => ['css' => '#pim_available_attributes'],
                 'Available attributes button'     => ['css' => 'button:contains("Add attributes")'],
@@ -37,7 +40,7 @@ class Form extends Base
                 'Available attributes search'     => ['css' => '.pimmultiselect input[type="search"]'],
                 'Available attributes add button' => ['css' => '.pimmultiselect a.btn:contains("Add")'],
                 'Updates grid'                    => ['css' => '.tab-pane.tab-history table.grid, .tab-container .history'],
-                'Save'                            => ['css' => 'button.btn-submit'],
+                'Save'                            => ['css' => '.AknButton--apply'],
                 'Panel sidebar'                   => [
                     'css'        => '.edit-form > .content',
                     'decorators' => ['Pim\Behat\Decorator\Page\PanelableDecorator']
@@ -64,50 +67,105 @@ class Form extends Base
     }
 
     /**
+     * Open the specified panel
+     *
+     * @param string $panel
+     */
+    public function openPanel($panel)
+    {
+        $elt = $this->spin(function () {
+            return $this->getElement('Panel selector');
+        }, 'Can not find the Panel selector');
+
+        $panel = strtolower($panel);
+        if (null === $elt->find('css', sprintf('button[data-panel$="%s"].active', $panel))) {
+            $elt->find('css', sprintf('button[data-panel$="%s"]', $panel))->click();
+        }
+    }
+
+    /**
+     * Close the specified panel
+     *
+     * @throws \Context\Spin\TimeoutException
+     */
+    public function closePanel()
+    {
+        $elt = $this->spin(function () {
+            return $this->getElement('Panel container')->find('css', 'header .close');
+        });
+
+        $elt->click();
+    }
+
+    /**
+     * Get the tabs in the current page
+     *
+     * @return NodeElement[]
+     */
+    public function getTabs()
+    {
+        $tabs = $this->spin(function () {
+            return $this->find('css', $this->elements['Tabs']['css']);
+        });
+
+        if (!$tabs) {
+            $tabs = $this->getElement('Oro tabs');
+        }
+
+        return $tabs->findAll('css', 'a');
+    }
+
+    /**
+     * Get the form tab containing $tab text
+     *
+     * @param string $tab
+     *
+     * @return NodeElement|null
+     */
+    public function getFormTab($tab)
+    {
+        $tabs = $this->getPageTabs();
+
+        try {
+            $node = $this->spin(function () use ($tabs, $tab) {
+                return $tabs->find('css', sprintf('a:contains("%s")', $tab));
+            }, sprintf('Cannot find form tab "%s"', $tab));
+        } catch (\Exception $e) {
+            $node = null;
+        }
+
+        return $node;
+    }
+
+    /**
+     * Get the specified tab
+     *
+     * @param string $tab
+     *
+     * @return NodeElement
+     */
+    public function getTab($tab)
+    {
+        return $this->spin(function () use ($tab) {
+            return $this->find('css', sprintf('a:contains("%s")', $tab));
+        }, sprintf('Cannot find the tab named "%s"', $tab));
+    }
+
+    /**
      * Visit the specified group
      *
      * @param string $group
-     *
-     * @throws ElementNotFoundException
-     * @throws \Exception
-     *
-     * @return bool
      */
     public function visitGroup($group)
     {
         $this->spin(function () use ($group) {
-            $groups = $this->find('css', $this->elements['Groups']['css']);
+            $group = $this->find('css', sprintf($this->elements['Group']['css'], $group));
+            if (null !== $group && $group->isVisible()) {
+                $group->click();
 
-            if (null === $groups) {
-                $groups = $this->getElement('Form Groups');
-
-                $groupsContainer = $groups->find('css', sprintf('.group-label:contains("%s")', $group));
-                $button = null;
-
-                if (null !== $groupsContainer) {
-                    $button = $groupsContainer->getParent();
-                }
-
-                if (null === $button) {
-                    $labels = array_map(function ($element) {
-                        return $element->getText();
-                    }, $groups->findAll('css', '.group-label'));
-
-                    throw new \Exception(sprintf('Could not find group "%s". Available groups are %s',
-                        $group,
-                        implode(', ', $labels)
-                    ));
-                }
-
-                $button->click();
-            } else {
-                $groups->clickLink($group);
+                return true;
             }
-
-            return true;
-        }, 'Cannot find the group selector.');
-
-        return true;
+        }, sprintf('Cannot find the group "%s".', $group));
     }
 
     /**
@@ -266,10 +324,12 @@ class Form extends Base
                 return $field;
             }
             echo "retry find file input" . PHP_EOL;
-        }, sprintf('Cannot find "%s" element', $locator));
+        }, sprintf('Cannot find "%s" file field', $locator));
 
         $field->attachFile($path);
-        $this->getSession()->executeScript('$(\'.edit .field-input input[type="file"]\').trigger(\'change\');');
+        $this
+            ->getSession()
+            ->executeScript('$(\'.edit .field-input input[type="file"], .AknMediaField-fileUploaderInput\').trigger(\'change\');');
     }
 
     /**
@@ -317,7 +377,6 @@ class Form extends Base
     {
         $label     = $this->extractLabelElement($field, $element);
         $fieldType = $this->getFieldType($label);
-
         switch ($fieldType) {
             case 'multiSelect2':
                 $this->fillMultiSelect2Field($label, $value);
@@ -361,9 +420,9 @@ class Form extends Base
      */
     public function expandAttribute($attribute)
     {
-        if (null === $label = $this->find('css', sprintf('label:contains("%s")', $attribute))) {
-            throw new \InvalidArgumentException(sprintf('Cannot find attribute "%s" field', $attribute));
-        }
+        $label = $this->spin(function () use ($attribute) {
+            return $this->find('css', sprintf('label:contains("%s")', $attribute));
+        }, sprintf('Cannot find attribute "%s" field', $attribute));
 
         $this->expand($label);
     }
@@ -386,24 +445,18 @@ class Form extends Base
      */
     public function findFieldInTabSection($groupField, $field)
     {
-        $tabSection = $this->find(
-            'css',
-            sprintf('.tabsection-title:contains("%s")', $groupField)
-        );
-
-        if (!$tabSection) {
-            throw new \InvalidArgumentException(
-                sprintf('Could not find tab section "%s"', $groupField)
+        $tabSection = $this->spin(function () use ($groupField) {
+            return $this->find(
+                'css',
+                sprintf('.tabsection-title:contains("%s")', $groupField)
             );
-        }
+        }, sprintf('Could not find tab section "%s"', $groupField));
 
         $accordionContent = $tabSection->getParent()->find('css', '.tabsection-content');
 
-        if (!$accordionContent->findField($field)) {
-            throw new \InvalidArgumentException(
-                sprintf('Could not find a "%s" field inside the %s accordion group', $field, $groupField)
-            );
-        }
+        $this->spin(function () use ($accordionContent, $field) {
+            return $accordionContent->findField($field);
+        }, sprintf('Could not find a "%s" field inside the %s accordion group', $field, $groupField));
     }
 
     /**
@@ -592,13 +645,13 @@ class Form extends Base
             $for = $label->getAttribute('for');
 
             if (0 === strpos($for, 's2id_')) {
-                if ($label->getParent()->find('css', '.select2-container-multi')) {
+                if ($this->getClosest($label, 'AknFieldContainer')->find('css', '.select2-container-multi')) {
                     return 'multiSelect2';
-                } elseif ($label->getParent()->find('css', 'select')) {
-                    return 'select';
+                } elseif ($this->getClosest($label, 'AknFieldContainer')->find('css', '.select2-container')) {
+                    return 'simpleSelect2';
                 }
 
-                return 'simpleSelect2';
+                return 'select';
             }
 
             if (null !== $this->find('css', sprintf('#date_selector_%s', $for))) {
@@ -634,7 +687,7 @@ class Form extends Base
     protected function fillMultiSelect2Field(NodeElement $label, $value)
     {
         $field = $this->decorate(
-            $label->getParent()->find('css', '.select2-container'),
+            $this->getClosest($label, 'AknFieldContainer')->find('css', '.select2-container'),
             ['Pim\Behat\Decorator\Field\Select2Decorator']
         );
 
@@ -652,7 +705,10 @@ class Form extends Base
     protected function fillSelect2Field(NodeElement $label, $value)
     {
         if (trim($value)) {
-            if (null !== $link = $label->getParent()->find('css', 'a.select2-choice')) {
+            $container = $this->getClosest($label, 'AknFieldContainer');
+            $link = $container->find('css', '.select2-choice');
+
+            if (null !== $link) {
                 $link->click();
                 $this->getSession()->wait($this->getTimeout(), '!$.active');
 
@@ -666,7 +722,7 @@ class Form extends Base
             }
 
             throw new \InvalidArgumentException(
-                sprintf('Could not find select2 widget inside %s', $label->getParent()->getHtml())
+                sprintf('Could not find select2 widget inside %s', $container->getHtml())
             );
         }
     }
@@ -679,7 +735,7 @@ class Form extends Base
      */
     protected function fillSelectField(NodeElement $label, $value)
     {
-        $field = $label->getParent()->find('css', 'select');
+        $field = $this->getClosest($label, 'AknFieldContainer')->find('css', 'select');
 
         $field->selectOption($value);
     }
@@ -727,9 +783,15 @@ class Form extends Base
         }
 
         $for   = $label->getAttribute('for');
-        $field = $this->find('css', sprintf('#%s', $for));
+        $field = $this->spin(function () use ($for) {
+            return $this->find('css', sprintf('#%s', $for));
+        }, sprintf('Cannot find element field with id %s', $for));
 
         $field->setValue($value);
+
+        $this->getSession()->executeScript(
+            sprintf("$('#%s').trigger('change');", $for)
+        );
     }
 
     /**
@@ -760,5 +822,25 @@ class Form extends Base
 
         $field = $this->findPriceField($label->labelContent, $label->subLabelContent);
         $field->setValue($value);
+    }
+
+    /**
+     * Returns the tabs of the current page, if any.
+     *
+     * @return NodeElement
+     */
+    protected function getPageTabs()
+    {
+        return $this->spin(function () {
+            $tabs = $this->find('css', $this->elements['Tabs']['css']);
+            if (null === $tabs) {
+                $tabs = $this->find('css', $this->elements['Oro tabs']['css']);
+            }
+            if (null === $tabs) {
+                $tabs = $this->find('css', $this->elements['Form tabs']['css']);
+            }
+
+            return $tabs;
+        }, 'Cannot find any tabs in this page');
     }
 }

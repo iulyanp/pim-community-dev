@@ -113,11 +113,7 @@
                             });
                         };
 
-                        if (hasDefaultView &&
-                                null === state.view &&
-                                null === state.filters &&
-                                null === state.columns
-                        ) {
+                        if (hasDefaultView && ('0' === state.view || null === state.view)) {
                             {% if hasDefaultView %}
                             applyView({{ defaultView.id }});
                             applyFilters('{{ defaultView.filters|raw }}');
@@ -140,12 +136,24 @@
                         }
 
                         {% if categoryBaseRoute is not null %}
-                        var categoryFilter = new CategoryFilter(urlParams, '{{ name }}', '{{ categoryBaseRoute }}');
+                        var categoryFilter = new CategoryFilter(
+                            urlParams,
+                            '{{ name }}',
+                            '{{ categoryBaseRoute }}',
+                            '#tree'
+                        );
                         {% endif %}
+
+                        state = DatagridState.get('{{ name }}', ['view', 'filters', 'columns']);
 
                         $.get(Routing.generate('pim_datagrid_load', urlParams), function(resp) {
                             if (state.columns) {
-                                resp.metadata.state.parameters = _.extend({}, resp.metadata.state.parameters, { view: { columns: state.columns }});
+                                resp.metadata.state.parameters = _.extend({}, resp.metadata.state.parameters, {
+                                    view: {
+                                        columns: state.columns,
+                                        id: state.view
+                                    }
+                                });
                             }
                             $('#grid-{{ name }}').data({ 'metadata': resp.metadata, 'data': JSON.parse(resp.data) });
 

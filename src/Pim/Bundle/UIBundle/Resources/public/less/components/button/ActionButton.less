@@ -1,0 +1,105 @@
+@import '../../base/variables';
+
+.AknActionButton {
+  height: @AknLittleButtonSize;
+  min-width: @AknLittleButtonSize;
+  line-height: @AknLittleButtonSize;
+  font-size: @AknDefaultFontSize;
+  border: 1px solid @AknBorderColor;
+  color: @AknDefaultFontColor;
+  background-color: white;
+  border-radius: 2px;
+  font-weight: normal;
+  padding: 0 10px;
+  vertical-align: middle;
+  display: inline-block;
+  cursor: pointer;
+  white-space: nowrap;
+  outline: none;
+
+  &-caret {
+    margin-left: 5px;
+  }
+
+  &:hover,
+  &:active,
+  &:focus {
+    background: @AknDefaultHoverBackground;
+  }
+
+  &--noRightBorder {
+    border-right: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  &--noLeftBorder {
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &-selectButton {
+    color: @AknDefaultFontColor;
+    cursor: pointer;
+    background: none;
+    border: none;
+
+    &:hover, &:active, &:focus {
+      outline: none;
+    }
+  }
+
+  &--big {
+    height: @AknDefaultButtonSize;
+    line-height: @AknDefaultButtonSize;
+  }
+
+  // jQuery select adds style for the button, we need to remove it for the filters.
+  .ui-multiselect {
+    width: auto !important;
+    padding: 0 !important;
+  }
+
+  &--glued {
+    border-radius: 0;
+
+    &:first-child {
+      border-top-left-radius: 2px;
+      border-bottom-left-radius: 2px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 2px;
+      border-bottom-right-radius: 2px;
+    }
+
+    & + & {
+      border-left: none;
+    }
+  }
+
+  &--disabled {
+    color: @AknLightFontColor;
+    background: @AknDisabledInputColor;
+    cursor: not-allowed;
+  }
+
+  &--input {
+    cursor: inherit;
+    padding-left: 3px;
+    padding-right: 3px;
+    text-align: center;
+    
+    &:hover {
+      background: white;
+    }
+  }
+
+  &--square {
+    min-width: @AknLittleButtonSize;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+  }
+}

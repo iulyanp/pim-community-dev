@@ -1,11 +1,15 @@
-<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+<a class="AknActionButton" data-toggle="dropdown" href="#">
     <%- currentScope %>
-    <span class="caret"></span>
+    <span class="AknActionButton-caret AknCaret"></span>
 </a>
-<ul class="dropdown-menu">
+<ul class="AknDropdown-menu">
     <% _.each(channels, function (scope) { %>
         <li>
-            <a data-scope="<%- scope.code %>" data-label="<%- scope.labels[catalogLocale] %>"><%- scope.labels[catalogLocale] %></a>
+            <a class="AknDropdown-menuLink"
+               data-scope="<%- scope.code %>"
+               data-label="<%- i18n.getLabel(scope.labels, catalogLocale, scope.code) %>">
+                <%- i18n.getLabel(scope.labels, catalogLocale, scope.code) %>
+            </a>
         </li>
     <% }); %>
 </ul>

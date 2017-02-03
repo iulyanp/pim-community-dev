@@ -38,12 +38,13 @@
                         FetcherRegistry.initialize().then(function() {
                             $.when(
                                 FetcherRegistry.getFetcher('channel').fetch(UserContext.get('catalogScope')),
-                                FetcherRegistry.getFetcher('locale').fetch(UserContext.get('catalogLocale')),
+                                FetcherRegistry.getFetcher('locale').fetch(UserContext.get('catalogLocale'), {'activated': true}),
                                 FormBuilder.build('pim-mass-product-edit-form')
                             ).then(function (channel, locale, form) {
                                 form.setData(product);
                                 mediator.trigger('pim_enrich:form:entity:post_fetch', product);
                                 form.setElement('#product-edit-form').render();
+                                form.$el.find('.AknTitleContainer').addClass('AknTitleContainer--hidden');
 
                                 var event = {
                                     sentData: product,
@@ -56,7 +57,7 @@
 
                                 $('#mass-edit-common-attribute-description').html(_.__(
                                     'pim_enrich.mass_edit_action.edit_common_attributes.description',
-                                    {'locale': locale.label, 'channel': channel.labels[UserContext.get('catalogLocale')]}
+                                    {'locale': locale.label, 'channel': channel.labels[UserContext.get('uiLocale')]}
                                 ));
                             });
                         });
@@ -66,5 +67,5 @@
 {% endblock %}
 
 {% block formDescription %}
-    <h4 id="mass-edit-common-attribute-description"></h4>
+    <div id="mass-edit-common-attribute-description"></div>
 {% endblock %}

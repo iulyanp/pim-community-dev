@@ -107,8 +107,8 @@ class NavigationContext extends PimContext implements PageObjectAwareInterface
         $this->getSession()->visit($this->locatePath('/user/logout'));
 
         $this->spin(function () {
-            return $this->getSession()->getPage()->find('css', '.title-box');
-        }, 'Cannot find ".title-box" element in login page');
+            return $this->getSession()->getPage()->find('css', '.AknLogin-title');
+        }, 'Cannot open the login page');
 
         $this->getSession()->getPage()->fillField('_username', $username);
         $this->getSession()->getPage()->fillField('_password', $username);
@@ -116,8 +116,8 @@ class NavigationContext extends PimContext implements PageObjectAwareInterface
         $this->getSession()->getPage()->find('css', '.form-signin button')->press();
 
         $this->spin(function () {
-            return $this->getSession()->getPage()->find('css', '.version-container');
-        }, sprintf('Spining for login with %s', $username));
+            return $this->getSession()->getPage()->find('css', '.AknDashboardButtons');
+        }, sprintf('Can not reach Dashboard after login with %s', $username));
     }
 
     /**
@@ -221,7 +221,7 @@ class NavigationContext extends PimContext implements PageObjectAwareInterface
      * @param string $page
      *
      * @Given /^I edit the "([^"]*)" (\w+)$/
-     * @Given /^I am on the "([^"]*)" (\w+) page$/
+     * @Given /^I am on the "([^"]*)" ((?!channel)\w+) page$/
      */
     public function iAmOnTheEntityEditPage($identifier, $page)
     {
@@ -229,6 +229,20 @@ class NavigationContext extends PimContext implements PageObjectAwareInterface
         $getter = sprintf('get%s', $page);
         $entity = $this->getFixturesContext()->$getter($identifier);
         $this->openPage(sprintf('%s edit', $page), ['id' => $entity->getId()]);
+    }
+
+    /**
+     * @param string $identifier
+     * @param string $page
+     *
+     * @Given /^I am on the "([^"]*)" (channel) page$/
+     */
+    public function iAmOnTheRedoEntityEditPage($identifier, $page)
+    {
+        $this->openPage(
+            sprintf('%s edit', ucfirst($page)),
+            ['code' => $identifier]
+        );
     }
 
     /**
@@ -343,29 +357,33 @@ class NavigationContext extends PimContext implements PageObjectAwareInterface
      */
     public function iShouldSeeANiceLoadingMessage()
     {
-        $message = $this->spin(function () {
-            return trim($this->getSession()
+        $messageNode = $this->spin(function () {
+            return $this->getSession()
                 ->getPage()
-                ->find('css', $this->elements['Loading message']['css'])
-                ->getHtml());
+                ->find('css', $this->elements['Loading message']['css']);
         }, 'Unable to find any loading message');
+
+        $message = trim($messageNode->getHtml());
 
         assertNotEquals('Loading ...', $message, 'The loading message should not equals the default value');
     }
 
     /**
-     * @param string $pageName
-     * @param array  $options
+     * @param string  $pageName
+     * @param array   $options
+     * @param boolean $wait     should the script wait for the page to load
      *
      * @return \SensioLabs\Behat\PageObjectExtension\PageObject\Page
      */
-    public function openPage($pageName, array $options = [])
+    public function openPage($pageName, array $options = [], $wait = true)
     {
         $this->currentPage = $pageName;
 
         $page = $this->getCurrentPage()->open($options);
 
-        $this->wait();
+        if ($wait) {
+            $this->wait();
+        }
 
         return $page;
     }
@@ -449,7 +467,9 @@ class NavigationContext extends PimContext implements PageObjectAwareInterface
     }
 
     /**
-     * TODO: should be deleted
+     * @deprecated This method is deprecated and should be removed avoid its use
+     * @see For more information regarding to deprecation see TIP-442
+     * @todo Delete method
      *
      * @param string $condition
      */

@@ -79,7 +79,34 @@ class SimpleSelectAttributeSetterSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(
-                InvalidArgumentException::stringExpected('attributeCode', 'setter', 'simple select', gettype($data))
+                InvalidArgumentException::stringExpected(
+                    'attributeCode',
+                    'Pim\Component\Catalog\Updater\Setter\SimpleSelectAttributeSetter',
+                    gettype($data)
+                )
+            )
+            ->duringSetAttributeData($product, $attribute, $data, ['locale' => 'fr_FR', 'scope' => 'mobile']);
+    }
+
+    function it_does_not_throw_an_error_if_attribute_is_a_numeric(
+        $attrOptionRepository,
+        AttributeInterface $attribute,
+        ProductInterface $product,
+        AttributeOptionInterface $attributeOption
+    ) {
+        $data = 70;
+
+        $attrOptionRepository
+            ->findOneByIdentifier('attributeCode.red')
+            ->willReturn($attributeOption);
+
+        $this
+            ->shouldNotThrow(
+                InvalidArgumentException::stringExpected(
+                    'attributeCode',
+                    'Pim\Component\Catalog\Updater\Setter\SimpleSelectAttributeSetter',
+                    gettype($data)
+                )
             )
             ->duringSetAttributeData($product, $attribute, $data, ['locale' => 'fr_FR', 'scope' => 'mobile']);
     }
@@ -98,8 +125,7 @@ class SimpleSelectAttributeSetterSpec extends ObjectBehavior
                     'attributeCode',
                     'code',
                     'The option does not exist',
-                    'setter',
-                    'simple select',
+                    'Pim\Component\Catalog\Updater\Setter\SimpleSelectAttributeSetter',
                     $data
                 )
             )

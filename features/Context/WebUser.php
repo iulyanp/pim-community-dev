@@ -178,18 +178,22 @@ class WebUser extends RawMinkContext
     public function iOpenTheHistory()
     {
         $this->getCurrentPage()->getElement('Panel sidebar')->openPanel('History');
-        $this->getMainContext()->executeScript("$('.panel-pane.history-panel').css({'height': '90%'});");
-
         $this->getMainContext()->spin(function () {
-            $expandHistory = $this->getCurrentPage()->find('css', '.expand-history');
+            $fullPanel = $this->getCurrentPage()->find(
+                'css',
+                '.AknTabContainer-contentThreeColumns.AknTabContainer-contentThreeColumns--fullPanel'
+            );
 
-            if ($expandHistory && $expandHistory->isValid()) {
-                $expandHistory->click();
+            if ((null === $fullPanel) || !$fullPanel->isVisible()) {
+                $expandHistory = $this->getCurrentPage()->find('css', '.expand-history');
+                if (null !== $expandHistory && $expandHistory->isVisible()) {
+                    $expandHistory->click();
+                }
 
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
         }, 'Cannot expand history');
 
         $this->wait();
@@ -647,22 +651,21 @@ class WebUser extends RawMinkContext
         $this->spin(function () use ($field, $label, $expected) {
             if ($field->hasClass('select2-focusser')) {
                 for ($i = 0; $i < 2; ++$i) {
-                    if (!$field->getParent()) {
+                    $parent = $field->getParent();
+                    if (!$parent) {
                         break;
                     }
-                    $field = $field->getParent();
+                    $field = $parent;
                 }
-                if ($select = $field->find('css', 'select')) {
-                    $actual = $select->find('css', 'option[selected]')->getHtml();
-                } else {
-                    $actual = trim($field->find('css', '.select2-chosen')->getHtml());
-                }
+
+                $actual = trim($field->find('css', '.select2-chosen')->getHtml());
             } elseif ($field->hasClass('select2-input')) {
                 for ($i = 0; $i < 4; ++$i) {
-                    if (!$field->getParent()) {
+                    $parent = $field->getParent();
+                    if (!$parent) {
                         break;
                     }
-                    $field = $field->getParent();
+                    $field = $parent;
                 }
                 if ($select = $field->find('css', 'select')) {
                     $options = $field->findAll('css', 'option[selected]');
@@ -805,7 +808,7 @@ class WebUser extends RawMinkContext
      *
      *
      * @When /^I change the (?P<field>\w+) to "([^"]*)"$/
-     * @When /^I change the "(?P<field>[^"]*)" to "([^"]*)"$/
+     * @When /^I change the "(?P<field>[^"]*)" to "(.*)"$/
      * @When /^I change the (?P<language>\w+) (?P<field>\w+) to "(?P<value>[^"]*)"$/
      * @When /^I change the (?P<field>\w+) to an invalid value$/
      */
@@ -1058,8 +1061,8 @@ class WebUser extends RawMinkContext
         $this->getCurrentPage()->fillPopinFields($table->getRowsHash());
 
         $addButton = $this->spin(function () {
-            return $this->getCurrentPage()->find('css', '.modal .btn.ok');
-        }, 'Cannot find ".modal .btn.ok" element in attribute modal');
+            return $this->getCurrentPage()->find('css', '.modal .ok');
+        }, 'Cannot find validate button in attribute modal');
 
         $addButton->click();
 
@@ -1140,7 +1143,9 @@ class WebUser extends RawMinkContext
     {
         $element = $popin ? $this->getCurrentPage()->find('css', '.ui-dialog') : null;
         if ($popin && !$element) {
-            $element = $this->getCurrentPage()->find('css', '.modal');
+            $element = $this->spin(function () {
+                return $this->getCurrentPage()->find('css', '.modal');
+            }, 'Modal not found.');
         }
 
         foreach ($table->getRowsHash() as $field => $value) {
@@ -1205,7 +1210,10 @@ class WebUser extends RawMinkContext
     public function iRemoveTheFile($field)
     {
         $this->wait();
-        $script = sprintf("$('label:contains(\"%s\")').parents('.form-field').find('.clear-field').click();", $field);
+        $script = sprintf(
+            "$('label:contains(\"%s\")').parents('.AknFieldContainer').find('.clear-field').click();",
+            $field
+        );
         if (!$this->getMainContext()->executeScript($script)) {
             $this->getCurrentPage()->removeFileFromField($field);
         }
@@ -1231,9 +1239,9 @@ class WebUser extends RawMinkContext
             );
             $this->wait();
             $this->getCurrentPage()
-                ->find('css', sprintf('div.preview span:contains("%s")', $link))
+                ->find('css', sprintf('.preview .filename:contains("%s")', $link))
                 ->getParent()
-                ->find('css', sprintf('span.open-media', $link))
+                ->find('css', sprintf('.open-media', $link))
                 ->click();
         } catch (UnsupportedDriverActionException $e) {
             throw $this->createExpectationException('You must use selenium for this feature.');
@@ -1276,6 +1284,33 @@ class WebUser extends RawMinkContext
     }
 
     /**
+     * @param TableNode $table
+     *
+     * @When /^I add an empty attribute option$/
+     * @When /^I add the following attribute option:$/
+     */
+    public function iAddAnOptionRow(TableNode $table = null)
+    {
+        $this->getCurrentPage()->createOption();
+
+        if (null !== $table) {
+            $values = $table->getRowsHash();
+            $code = $values['Code'];
+            unset($values['Code']);
+
+            $this->getCurrentPage()->fillLastOption($code, $values);
+        }
+    }
+
+    /**
+     * @When /^I update the last attribute option$/
+     */
+    public function iUpdateTheLastAttributeOption()
+    {
+        $this->getCurrentPage()->saveLastOption();
+    }
+
+    /**
      * @param string $oldOptionName
      * @param string $newOptionName
      *
@@ -1295,8 +1330,11 @@ class WebUser extends RawMinkContext
      */
     public function iEditAndCancelToEditTheFollowingAttributeOptions($oldOptionName, $newOptionName)
     {
-        $this->getCurrentPage()->editOptionAndCancel($oldOptionName, $newOptionName);
-        $this->wait();
+        $this->spin(function () use ($oldOptionName, $newOptionName) {
+            $this->getCurrentPage()->editOptionAndCancel($oldOptionName, $newOptionName);
+
+            return true;
+        }, 'Can not edit and cancel code');
     }
 
     /**
@@ -1311,6 +1349,21 @@ class WebUser extends RawMinkContext
 
             return true;
         }, sprintf("Can not find any '%s' button", $button));
+    }
+
+    /**
+     * @param string locator
+     *
+     * @When /^I hover over the element "([^"]*)"$/
+     */
+    public function iHoverOverTheElement($locator)
+    {
+        $page = $this->getCurrentPage();
+        $element = $this->spin(function () use ($page, $locator) {
+            return $page->find('css', $locator);
+        }, sprintf("Can not find any '%s' element", $locator));
+
+        $element->mouseOver();
     }
 
     /**
@@ -1339,7 +1392,7 @@ class WebUser extends RawMinkContext
         }, sprintf("Can not find any '%s' button", $button));
 
         $this->spin(function () use ($buttonNode) {
-            return $buttonNode->hasClass('disabled');
+            return $buttonNode->hasClass('disabled') || $buttonNode->hasClass('AknButton--disabled');
         }, sprintf("The button '%s' is not disabled", $button));
     }
 
@@ -1374,6 +1427,18 @@ class WebUser extends RawMinkContext
     }
 
     /**
+     * @param string $button
+     *
+     * @Given /^I should not see the "([^"]*)" icon button$/
+     */
+    public function iShouldNotSeeTheIconButton($button)
+    {
+        $this->spin(function () use ($button) {
+            return null === $this->getCurrentPage()->getIconButton($button);
+        }, sprintf('Icon button "%s" should not be displayed', $button));
+    }
+
+    /**
      * @param string $buttonLabel
      *
      * @Given /^I press the "([^"]*)" button in the popin$/
@@ -1387,6 +1452,7 @@ class WebUser extends RawMinkContext
         }, sprintf('Cannot find "%s" button label in modal', $buttonLabel));
 
         $buttonElement->press();
+
         $this->wait();
     }
 
@@ -1578,10 +1644,9 @@ class WebUser extends RawMinkContext
      */
     public function iShouldSeeCategoryCount($count)
     {
-        $badge = $this->getCurrentPage()->find('css', sprintf('span.badge:contains("%d")', $count));
-        if (!$badge) {
-            throw $this->createExpectationException('Category badge not found');
-        }
+        $this->spin(function () use ($count) {
+            return $this->getCurrentPage()->find('css', sprintf('.AknBadge:contains("%d")', $count));
+        }, sprintf('Can not find any badge with count "%s"', $count));
     }
 
     /**
@@ -1624,7 +1689,7 @@ class WebUser extends RawMinkContext
      */
     public function iWaitForTheJobToFinish($code)
     {
-        $condition = '$("#status").length && /(COMPLETED|STOPPED|FAILED|TERMINÉ|ARRÊTÉ|EN ÉCHEC)$/.test($("#status").text().trim())';
+        $condition = '$("#status").length && /(Completed|Stopped|Failed|TERMINÉ|ARRÊTÉ|EN ÉCHEC)$/.test($("#status").text().trim())';
 
         try {
             $this->wait($condition);
@@ -1933,7 +1998,9 @@ class WebUser extends RawMinkContext
     public function iMoveOnToTheNextStep()
     {
         $this->scrollContainerTo(900);
-        $this->wait('$(".btn.next").length > 0');
+        $this->spin(function () {
+            return $this->getCurrentPage()->find('css', '.next');
+        }, 'Could not find next button');
         $this->getCurrentPage()->next();
         $this->scrollContainerTo(900);
         $this->getCurrentPage()->confirm();

@@ -23,7 +23,7 @@ define(
             className: 'panel-pane completeness-panel',
             events: {
                 'click header': 'switchLocale',
-                'click .missing-attributes span': 'showAttribute'
+                'click .missing-attributes a': 'showAttribute'
             },
 
             /**
@@ -53,7 +53,7 @@ define(
                 if (this.getFormData().meta) {
                     $.when(
                         this.fetchCompleteness(),
-                        FetcherRegistry.getFetcher('locale').fetchAll()
+                        FetcherRegistry.getFetcher('locale').search({'activated': true})
                     ).then(function (completeness, locales) {
                         this.$el.html(
                             this.template({

@@ -1,0 +1,30 @@
+<div class="AknFilterChoice metricfilter choicefilter">
+    <div class="AknFilterChoice-operator AknDropdown btn-group">
+        <button class="AknActionButton AknActionButton--big AknActionButton--noRightBorder dropdown-toggle" data-toggle="dropdown">
+            <%= _.__('Action') %>
+            <span class="AknCaret caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <% _.each(choices, function (choice) { %>
+            <li><a class="choice_value" href="#" data-value="<%= choice.value %>"><%= choice.label %></a></li>
+            <% }); %>
+            </ul>
+        <input class="name_input" type="hidden" name="metric_type" value=""/>
+        </div>
+
+    <input class="AknTextField AknTextField--noRadius AknFilterChoice-field" type="text" name="value" value="">
+
+    <div class="AknFilterChoice-operator AknDropdown">
+        <button class="AknActionButton AknActionButton--big AknActionButton--noRightBorder AknActionButton--noLeftBorder dropdown-toggle" data-toggle="dropdown">
+            <%= _.__('Unit') %>
+            <span class="AknCaret caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <% _.each(units, function (symbol, code) { %>
+                <li><a class="choice_value" href="#" data-value="<%= code %>"><%= _.__(code) %></a></li>
+            <% }); %>
+            </ul>
+        <input class="name_input" type="hidden" name="metric_unit" value=""/>
+        </div>
+    <button class="AknButton AknButton--apply AknFilterChoice-button AknButton--noLeftRadius filter-update" type="button"><%= _.__("Update") %></button>
+</div>

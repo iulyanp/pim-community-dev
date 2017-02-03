@@ -124,6 +124,7 @@ class FixturesContext extends BaseFixturesContext
         $uniqueValueSet->reset();
 
         $this->refresh($product);
+        $this->buildProductHistory($product);
 
         return $product;
     }
@@ -183,13 +184,28 @@ class FixturesContext extends BaseFixturesContext
     }
 
     /**
+     * Generates a given number of families.
+     *
+     * @param int $familyNumber
+     *
+     * @Given /^([0-9]+) generated families$/
+     */
+    public function generatedFamilies($familyNumber)
+    {
+        for ($i = 1; $i <= $familyNumber; $i++) {
+            $familyCode = sprintf('family_%d', $i);
+            $this->createFamily($familyCode);
+        }
+    }
+
+    /**
      * @param TableNode $table
      *
      * @Given /^the following attribute groups?:$/
      */
     public function theFollowingAttributeGroups(TableNode $table)
     {
-        foreach ($table->getHash() as $index => $data) {
+        foreach ($table->getHash() as $data) {
             $this->createAttributeGroup($data);
         }
     }
@@ -685,6 +701,7 @@ class FixturesContext extends BaseFixturesContext
             new Step\Given("I am on the \"$channel\" channel page"),
             new Step\Given("I fill in \"Locales\" with \"$locale\" on the current page"),
             new Step\Given("I press \"Save\""),
+            new Step\Given("I should not see the text \"There are unsaved changes.\"")
         ];
     }
 
@@ -811,7 +828,7 @@ class FixturesContext extends BaseFixturesContext
      * @param string $identifier
      * @param string $value
      *
-     * @Given /^attribute (\w+) of "([^"]*)" should be "([^"]*)"$/
+     * @Given /^attribute (\w+) of "([^"]*)" should be "(.*)"$/
      */
     public function theOfShouldBe($attribute, $identifier, $value)
     {
@@ -826,7 +843,7 @@ class FixturesContext extends BaseFixturesContext
      * @param string $identifier
      * @param string $value
      *
-     * @Given /^the (\w+) (\w+) of "([^"]*)" should be "([^"]*)"$/
+     * @Given /^the (\w+) (\w+) of "([^"]*)" should be "(.*)"$/
      */
     public function theLocalizableOfShouldBe($lang, $attribute, $identifier, $value)
     {
@@ -845,7 +862,7 @@ class FixturesContext extends BaseFixturesContext
      * @param string $identifier
      * @param string $value
      *
-     * @Given /^the (\w+) (\w+) (\w+) of "([^"]*)" should be "([^"]*)"$/
+     * @Given /^the (\w+) (\w+) (\w+) of "([^"]*)" should be "(.*)"$/
      */
     public function theScopableOfShouldBe($lang, $scope, $attribute, $identifier, $value)
     {
@@ -1102,6 +1119,31 @@ class FixturesContext extends BaseFixturesContext
 
             return true;
         }, sprintf('Cannot get the product %s', $identifier));
+    }
+
+    /**
+     * @param string    $identifier
+     * @param TableNode $table
+     *
+     * @Then /^the product "([^"]*)" should have the following associations?:$/
+     */
+    public function theProductShouldHaveTheFollowingAssociations($identifier, TableNode $table)
+    {
+        $this->getMainContext()->getSubcontext('hook')->clearUOW();
+        $filter = $this->getContainer()->get('pim_catalog.comparator.filter.product_association');
+
+        $values['associations'] = [];
+        foreach ($table->getHash() as $row) {
+            if (isset($row['products'])) {
+                $values['associations'][$row['type']]['products'] = explode(',', $row['products']);
+            }
+
+            if (isset($row['groups'])) {
+                $values['associations'][$row['type']]['groups'] = explode(',', $row['groups']);
+            }
+        }
+
+        assertEquals([], $filter->filter($this->getProduct($identifier), $values));
     }
 
     /**
@@ -1427,7 +1469,14 @@ class FixturesContext extends BaseFixturesContext
      */
     public function theHistoryOfTheProductHasBeenBuilt($identifier)
     {
-        $product = $this->getProduct($identifier);
+        $this->buildProductHistory($this->getProduct($identifier));
+    }
+
+    /**
+     * @param ProductInterface $product
+     */
+    protected function buildProductHistory(ProductInterface $product)
+    {
         $this->getVersionManager()->setRealTimeVersioning(true);
         $versions = $this->getVersionManager()->buildPendingVersions($product);
         foreach ($versions as $version) {
@@ -1488,13 +1537,23 @@ class FixturesContext extends BaseFixturesContext
     }
 
     /**
+     * We cannot use the product saver to update the product as it automatically updates the product updatedAt date.
+     *
      * @Given /^I set the updated date of the (product "([^"]+)") to "([^"]+)"$/
      */
     public function theProductUpdatedDateIs(ProductInterface $product, $identifier, $expected)
     {
         $product->setUpdated(new \DateTime($expected));
 
-        $this->getProductSaver()->save($product);
+        $objectManager = null;
+        if ($this->isMongoDB()) {
+            $objectManager = $this->getDocumentManager();
+        } else {
+            $objectManager = $this->getEntityManager();
+        }
+
+        $objectManager->persist($product);
+        $objectManager->flush();
     }
 
     /**
@@ -1757,7 +1816,6 @@ class FixturesContext extends BaseFixturesContext
 
         $data = array_merge(
             [
-                'label'      => null,
                 'currencies' => null,
                 'locales'    => null,
                 'tree'       => null,
@@ -1768,7 +1826,6 @@ class FixturesContext extends BaseFixturesContext
         $channel = new Channel();
 
         $channel->setCode($data['code']);
-        $channel->setLabel($data['label']);
 
         foreach ($this->listToArray($data['currencies']) as $currencyCode) {
             $channel->addCurrency($this->getCurrency(['code' => explode(',', $currencyCode)]));
@@ -1780,6 +1837,14 @@ class FixturesContext extends BaseFixturesContext
 
         if ($data['tree']) {
             $channel->setCategory($this->getCategory($data['tree']));
+        }
+
+        foreach ($data as $key => $value) {
+            $matches = null;
+            if (preg_match('/label-(<?locale>\d+)/', $key, $matches)) {
+                $channel->setLocale($matches['locale']);
+                $channel->setLabel($value);
+            }
         }
 
         $this->validate($channel);
@@ -2152,5 +2217,31 @@ class FixturesContext extends BaseFixturesContext
     protected function listToArray($list)
     {
         return $this->getMainContext()->listToArray($list);
+    }
+
+    /**
+     * @return boolean
+     */
+    protected function isMongoDB()
+    {
+        return 'doctrine/mongodb-odm' === $this->getParameter('pim_catalog_product_storage_driver');
+    }
+
+    /**
+     * Return doctrine manager instance
+     *
+     * @return \Doctrine\Common\Persistence\ObjectManager
+     */
+    protected function getEntityManager()
+    {
+        return $this->getContainer()->get('doctrine')->getManager();
+    }
+
+    /**
+     * @return \Doctrine\Common\Persistence\ObjectManager
+     */
+    protected function getDocumentManager()
+    {
+        return $this->getContainer()->get('doctrine_mongodb')->getManager();
     }
 }

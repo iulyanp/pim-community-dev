@@ -24,6 +24,9 @@ class BaseDecorator extends ElementDecorator
      */
     public function remove()
     {
+        $this->spin(function () {
+            return $this->find('css', '.remove');
+        }, 'Can not find the remove button.')->click();
     }
 
     /**
@@ -37,7 +40,7 @@ class BaseDecorator extends ElementDecorator
             return $this->find('css', '.locale-switcher');
         }, 'Cannot find the locale switcher. Are you sure that this attribute is localizable?');
 
-        $localeSwitcher->find('css', '.dropdown-toggle')->click();
+        $localeSwitcher->find('css', '.dropdown-toggle, *[data-toggle="dropdown"]')->click();
         $localeSwitcher->find('css', sprintf('a[data-locale="%s"]', $locale))->click();
     }
 
@@ -52,7 +55,7 @@ class BaseDecorator extends ElementDecorator
             return $this->find('css', '.scope-switcher');
         }, 'Cannot find the scope switcher. Are you sure that this attribute is scopable?');
 
-        $scopeSwitcher->find('css', '.dropdown-toggle')->click();
+        $scopeSwitcher->find('css', '.dropdown-toggle, *[data-toggle="dropdown"]')->click();
         $scopeSwitcher->find('css', sprintf('a[data-scope="%s"]', $scope))->click();
     }
 }

@@ -1,0 +1,27 @@
+<td class="AknGrid-bodyCell field-cell">
+    <div class="AknFieldContainer AknFieldContainer--withoutMargin">
+        <div class="AknFieldContainer-inputContainer">
+            <input type="text" class="AknTextField attribute_option_code exclude" value="<%- item.code %>"/>
+            <div class="AknFieldContainer-iconsContainer">
+                <i class="AknIconButton AknIconButton--important AknIconButton--hide icon-warning-sign validation-tooltip" data-placement="top" data-toggle="tooltip"></i>
+            </div>
+        </div>
+    </div>
+</td>
+<% _.each(locales, function (locale) { %>
+    <td class="AknGrid-bodyCell field-cell">
+        <% if (item.optionValues[locale]) { %>
+            <input type="text" class="AknTextField attribute-option-value exclude" data-locale="<%- locale %>"
+                value="<%- item.optionValues[locale].value %>"/>
+        <% } else { %>
+            <input type="text" class="AknTextField attribute-option-value exclude" data-locale="<%- locale %>"
+        value=""/>
+        <% } %>
+    </td>
+<% }); %>
+<td class="AknGrid-bodyCell">
+    <div class="AknButtonList AknButtonList--right">
+        <span class="AknButtonList-item AknIconButton AknIconButton--small AknIconButton--apply update-row"><i class="icon-ok"></i></span>
+        <span class="AknButtonList-item AknIconButton AknIconButton--small AknIconButton--important show-row"><i class="icon-remove"></i></span>
+    </div>
+</td>

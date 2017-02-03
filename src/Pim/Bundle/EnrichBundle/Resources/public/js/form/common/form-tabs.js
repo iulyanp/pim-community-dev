@@ -18,7 +18,7 @@ define(
     function ($, _, Backbone, BaseForm, template) {
         return BaseForm.extend({
             template: _.template(template),
-            className: 'tabbable tabs-top',
+            className: 'AknTabContainer tabbable tabs-top',
             tabs: [],
             fullPanel: false,
             urlParsed: false,
@@ -84,7 +84,7 @@ define(
                 this.delegateEvents();
                 this.initializeDropZones();
 
-                var currentTab = this.getExtension(this.getCurrentTab());
+                var currentTab = this.getTabExtension(this.getCurrentTab());
                 if (currentTab) {
                     var zone = this.getZone('container');
                     zone.appendChild(currentTab.el);
@@ -119,23 +119,9 @@ define(
              * Resize the container to avoid multiple scrollbar
              */
             resize: function () {
-                var currentTab = this.getExtension(this.getCurrentTab());
+                var currentTab = this.getTabExtension(this.getCurrentTab());
                 if (currentTab && _.isFunction(currentTab.resize)) {
                     currentTab.resize();
-                } else {
-                    this.resizeContainer();
-                }
-            },
-
-            /**
-             * Default resize method
-             */
-            resizeContainer: function () {
-                var container = this.$('> .form-container');
-                if (container.length && this.getRoot().$el.length && container.offset()) {
-                    container.css(
-                        {'height': ($(window).height() - container.offset().top - 4) + 'px'}
-                    );
                 }
             },
 
@@ -222,6 +208,24 @@ define(
                 if ((currentTabIsNotDefined || currentTabDoesNotExist) && _.first(tabs)) {
                     this.setCurrentTab(_.first(tabs).code);
                 }
+            },
+
+            /**
+             * Get a child tab extension
+             *
+             * @param {string} code
+             *
+             * @return {Object}
+             */
+            getTabExtension: function (code) {
+                return this.extensions[_.find(this.extensions, function (extension) {
+                    var extensionCode = extension.config && extension.config.tabCode ?
+                        extension.config.tabCode :
+                        extension.code;
+                    var expectedPosition = extensionCode.length - code.length;
+
+                    return expectedPosition >= 0 && expectedPosition === extensionCode.indexOf(code, expectedPosition);
+                }).code];
             }
         });
     }

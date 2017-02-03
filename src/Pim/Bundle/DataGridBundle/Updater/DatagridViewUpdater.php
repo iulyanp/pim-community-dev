@@ -2,10 +2,11 @@
 
 namespace Pim\Bundle\DataGridBundle\Updater;
 
+use Akeneo\Component\StorageUtils\Exception\InvalidObjectException;
+use Akeneo\Component\StorageUtils\Repository\IdentifiableObjectRepositoryInterface;
 use Akeneo\Component\StorageUtils\Updater\ObjectUpdaterInterface;
 use Doctrine\Common\Util\ClassUtils;
 use Pim\Bundle\DataGridBundle\Entity\DatagridView;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * Update the datagrid view properties
@@ -16,18 +17,26 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class DatagridViewUpdater implements ObjectUpdaterInterface
 {
+    /** @var IdentifiableObjectRepositoryInterface */
+    protected $userRepository;
+
+    /**
+     * @param IdentifiableObjectRepositoryInterface $userRepository
+     */
+    public function __construct(IdentifiableObjectRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function update($datagridView, array $data, array $options = [])
     {
         if (!$datagridView instanceof DatagridView) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'Expects a "%s", "%s" provided.',
-                    DatagridView::class,
-                    ClassUtils::getClass($datagridView)
-                )
+            throw InvalidObjectException::objectExpected(
+                ClassUtils::getClass($datagridView),
+                DatagridView::class
             );
         }
 
@@ -52,7 +61,8 @@ class DatagridViewUpdater implements ObjectUpdaterInterface
                 $datagridView->setLabel($value);
                 break;
             case 'owner':
-                $datagridView->setOwner($value);
+                $user = $this->userRepository->findOneByIdentifier($value);
+                $datagridView->setOwner($user);
                 break;
             case 'datagrid_alias':
                 $datagridView->setDatagridAlias($value);

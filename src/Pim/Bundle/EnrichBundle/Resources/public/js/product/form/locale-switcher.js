@@ -18,14 +18,14 @@ define(
     function (_, BaseForm, template, FetcherRegistry, i18n) {
         return BaseForm.extend({
             template: _.template(template),
-            className: 'btn-group locale-switcher',
+            className: 'AknDropdown AknButtonList-item locale-switcher',
             events: {
                 'click li a': 'changeLocale'
             },
             render: function () {
                 this.getDisplayedLocales()
                     .done(function (locales) {
-                        var params = { localeCode: locales[0].code };
+                        var params = { localeCode: _.first(locales).code };
                         this.trigger('pim_enrich:form:locale_switcher:pre_render', params);
 
                         this.$el.html(
@@ -47,7 +47,7 @@ define(
              * @returns {Promise}
              */
             getDisplayedLocales: function () {
-                return FetcherRegistry.getFetcher('locale').fetchAll();
+                return FetcherRegistry.getFetcher('locale').search({'activated': true});
             },
 
             /**

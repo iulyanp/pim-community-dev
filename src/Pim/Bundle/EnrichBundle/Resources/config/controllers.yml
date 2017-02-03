@@ -39,7 +39,9 @@ parameters:
     pim_enrich.controller.rest.variant_group.class:           Pim\Bundle\EnrichBundle\Controller\Rest\VariantGroupController
     pim_enrich.controller.rest.variant_group_attribute.class: Pim\Bundle\EnrichBundle\Controller\Rest\VariantGroupAttributeController
     pim_enrich.controller.rest.versioning.class:              Pim\Bundle\EnrichBundle\Controller\Rest\VersioningController
-    pim_enrich.controller.mass_edit.abstract: Pim\Bundle\EnrichBundle\Controller\MassEdit\AbstractMassEditController
+    pim_enrich.controller.mass_edit.abstract:                 Pim\Bundle\EnrichBundle\Controller\MassEdit\AbstractMassEditController
+    pim_enrich.controller.rest.attribute_option.class:        Pim\Bundle\EnrichBundle\Controller\Rest\AttributeOptionController
+    pim_enrich.controller.rest.job_instance.class:            Pim\Bundle\EnrichBundle\Controller\Rest\JobInstanceController
 
 services:
     pim_enrich.controller.attribute_group:
@@ -78,15 +80,6 @@ services:
     pim_enrich.controller.channel:
         scope: request
         class: '%pim_enrich.controller.channel.class%'
-        arguments:
-            - '@request'
-            - '@router'
-            - '@translator'
-            - '@pim_enrich.form.handler.channel'
-            - '@pim_enrich.form.channel'
-            - '@pim_catalog.remover.channel'
-            - '@pim_catalog.saver.locale'
-            - '@pim_catalog.repository.channel'
 
     pim_enrich.controller.currency:
         scope: request
@@ -292,7 +285,7 @@ services:
             - '@templating'
             - '@translator'
             - '@event_dispatcher'
-            - '@pim_import_export.repository.job_execution'
+            - '@pim_enrich.repository.job_execution'
             - '@pim_connector.event_listener.archivist'
             - '@pim_serializer'
             - '@akeneo_batch.manager.job_execution'
@@ -303,6 +296,11 @@ services:
         arguments:
             - '@pim_catalog.repository.association_type'
             - '@pim_internal_api_serializer'
+            - '@pim_catalog.remover.association_type'
+            - '@pim_catalog.updater.association_type'
+            - '@pim_catalog.saver.association_type'
+            - '@validator'
+            - '@pim_user.context.user'
 
     pim_enrich.controller.rest.attribute:
         class: '%pim_enrich.controller.rest.attribute.class%'
@@ -337,6 +335,11 @@ services:
         arguments:
             - '@pim_catalog.repository.channel'
             - '@pim_internal_api_serializer'
+            - '@pim_catalog.updater.channel'
+            - '@pim_catalog.saver.channel'
+            - '@pim_catalog.remover.channel'
+            - '@pim_catalog.factory.channel'
+            - '@validator'
 
     pim_enrich.controller.rest.completeness:
         class: '%pim_enrich.controller.rest.completeness.class%'
@@ -459,7 +462,7 @@ services:
 
     pim_enrich.controller.rest.variant_group_attribute:
         scope: request
-        class: %pim_enrich.controller.rest.variant_group_attribute.class%
+        class: '%pim_enrich.controller.rest.variant_group_attribute.class%'
         arguments:
             - '@pim_catalog.repository.group'
             - '@pim_catalog.saver.group'
@@ -472,3 +475,27 @@ services:
             - '@pim_versioning.repository.version'
             - '@pim_catalog.resolver.fqcn'
             - '@pim_internal_api_serializer'
+
+    pim_enrich.controller.rest.attribute_option:
+        class: '%pim_enrich.controller.rest.attribute_option.class%'
+        arguments:
+            - '@pim_enrich.repository.attribute_option.search'
+            - '@pim_enrich.normalizer.structured.attribute_option'
+
+    pim_enrich.controller.rest.job_instance:
+        class: '%pim_enrich.controller.rest.job_instance.class%'
+        arguments:
+            - '@akeneo_batch.job.job_instance_repository'
+            - '@akeneo_batch.job.job_registry'
+            - '@pim_catalog.normalizer.standard.job_instance'
+            - '@akeneo_batch.updater.job_instance'
+            - '@akeneo_batch.saver.job_instance'
+            - '@akeneo_batch.remover.job_instance'
+            - '@validator'
+            - '@akeneo_batch.job.job_parameters_validator'
+            - '@akeneo_batch.job_parameters_factory'
+            - '@akeneo_batch.launcher.simple_job_launcher'
+            - '@security.token_storage'
+            - '@router'
+            - '@pim_enrich.provider.form.chained'
+            - '@pim_catalog.filter.chained'

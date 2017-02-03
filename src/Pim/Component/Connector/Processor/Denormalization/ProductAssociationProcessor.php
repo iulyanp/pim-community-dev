@@ -5,6 +5,7 @@ namespace Pim\Component\Connector\Processor\Denormalization;
 use Akeneo\Component\Batch\Item\ItemProcessorInterface;
 use Akeneo\Component\Batch\Step\StepExecutionAwareInterface;
 use Akeneo\Component\StorageUtils\Detacher\ObjectDetacherInterface;
+use Akeneo\Component\StorageUtils\Exception\ObjectUpdaterException;
 use Akeneo\Component\StorageUtils\Repository\IdentifiableObjectRepositoryInterface;
 use Akeneo\Component\StorageUtils\Updater\ObjectUpdaterInterface;
 use Pim\Component\Catalog\Comparator\Filter\ProductFilterInterface;
@@ -95,10 +96,18 @@ class ProductAssociationProcessor extends AbstractProcessor implements
 
                 return null;
             }
+        } elseif (!$this->hasImportedAssociations($item)) {
+            $this->detachProduct($product);
+            $this->stepExecution->incrementSummaryInfo('product_skipped_no_associations');
+
+            return null;
         }
 
         try {
             $this->updateProduct($product, $item);
+        } catch (ObjectUpdaterException $exception) {
+            $this->detachProduct($product);
+            $this->skipItemWithMessage($item, $exception->getMessage(), $exception);
         } catch (\InvalidArgumentException $exception) {
             $this->detachProduct($product);
             $this->skipItemWithMessage($item, $exception->getMessage(), $exception);
@@ -128,7 +137,7 @@ class ProductAssociationProcessor extends AbstractProcessor implements
      * @param ProductInterface $product
      * @param array            $item
      *
-     * @throws \InvalidArgumentException
+     * @throws ObjectUpdaterException
      */
     protected function updateProduct(ProductInterface $product, array $item)
     {
@@ -175,5 +184,27 @@ class ProductAssociationProcessor extends AbstractProcessor implements
     protected function detachProduct(ProductInterface $product)
     {
         $this->detacher->detach($product);
+    }
+
+    /**
+     * It there association(s) in new values ?
+     *
+     * @param array $item
+     *
+     * @return bool
+     */
+    protected function hasImportedAssociations(array $item)
+    {
+        if (!isset($item['associations'])) {
+            return false;
+        }
+
+        foreach ($item['associations'] as $association) {
+            if (!empty($association['products']) || !empty($association['groups'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -25,7 +25,7 @@ Feature: Associate a product
     Then I should see the text "1 products and 0 groups"
     Then the row "shoelaces" should be checked
 
-  @skip @jira https://akeneo.atlassian.net/browse/PIM-4788
+  @jira https://akeneo.atlassian.net/browse/PIM-4788
   Scenario: Associate a product to another group
     Given I edit the "charcoal-boots" product
     When I visit the "Associations" tab
@@ -33,11 +33,13 @@ Feature: Associate a product
     And I press the "Show groups" button
     And I check the row "caterpillar_boots"
     And I save the product
-    And I press the "Show groups" button
+    And I edit the "charcoal-boots" product
+    And I visit the "Associations" tab
+    And I select the "Upsell" association
     Then I should see the text "0 products and 1 groups"
-    Then the row "caterpillar_boots" should be checked
+    And the row "caterpillar_boots" should be checked
 
-  @skip @jira https://akeneo.atlassian.net/browse/PIM-4788
+  @jira https://akeneo.atlassian.net/browse/PIM-4788
   Scenario: Associate a product to multiple products and groups
     Given I edit the "black-boots" product
     And I visit the "Associations" tab
@@ -73,7 +75,7 @@ Feature: Associate a product
     And I should be able to sort the rows by Is associated
     And I should be able to sort the rows by SKU
 
-  @skip @jira https://akeneo.atlassian.net/browse/PIM-4670
+  @jira https://akeneo.atlassian.net/browse/PIM-4670
   Scenario: Keep association selection between tabs
     Given I edit the "charcoal-boots" product
     When I visit the "Associations" tab
@@ -87,6 +89,7 @@ Feature: Associate a product
     And I visit the "Attributes" tab
     And I visit the "Associations" tab
     And I select the "Cross sell" association
+    And I press the "Show products" button
     Then the row "gray-boots" should be checked
     And the row "black-boots" should be checked
     When I select the "Pack" association
@@ -96,6 +99,7 @@ Feature: Associate a product
     Then the row "similar_boots" should be checked
     When I save the product
     And I select the "Cross sell" association
+    And I press the "Show products" button
     And I uncheck the rows "black-boots"
     And I select the "Upsell" association
     And I check the rows "shoelaces"
@@ -146,7 +150,7 @@ Feature: Associate a product
     And the rows "black-boots and gray-boots" should be checked
     And the rows should be sorted descending by Is associated
 
-  @skip @jira https://akeneo.atlassian.net/browse/PIM-5161
+  @jira https://akeneo.atlassian.net/browse/PIM-5161
   Scenario: Grid is sortable by "is associated"
     Given the following products:
       | sku          |
@@ -180,7 +184,8 @@ Feature: Associate a product
     Given I edit the "shoelaces" product
     And I visit the "Associations" tab
     And I select the "Substitution" association
-    And I filter by "sku" with operator "Contains" and value "gr"
+    Then the grid should contain 6 elements
+    When I filter by "sku" with operator "Contains" and value "gr"
     And I press the "Show groups" button
     And I filter by "type" with operator "equals" and value "[RELATED]"
     When I edit the "gray-boots" product
@@ -189,3 +194,28 @@ Feature: Associate a product
     And I should see the text "Type: [RELATED]"
     When I press the "Show products" button
     Then I should see the text "SKU: Contains \"gr\""
+
+  @jira https://akeneo.atlassian.net/browse/PIM-6110
+  Scenario: Product associations are not erased when an attribute is saved
+    Given I edit the "charcoal-boots" product
+    When I visit the "Associations" tab
+    And I check the row "gray-boots"
+    And I save the product
+    And I visit the "Attributes" tab
+    And I add available attributes Name
+    And I fill in "Name" with "test"
+    And I save the product
+    And I visit the "Associations" tab
+    Then the rows "gray-boots" should be checked
+
+  @jira https://akeneo.atlassian.net/browse/PIM-6113
+  Scenario: Do not keep saved product association groups after switching association type
+    Given I edit the "charcoal-boots" product
+    And I visit the "Associations" tab
+    And I select the "Upsell" association
+    And I press the "Show groups" button
+    And I check the row "caterpillar_boots"
+    And I save the product
+    When I select the "Substitution" association
+    Then I should see the text "0 products and 0 groups"
+    And the row "caterpillar_boots" should not be checked

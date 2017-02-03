@@ -16,7 +16,7 @@ class Edit extends Form
     /**
      * @var string
      */
-    protected $path = '/spread/export/{id}/edit';
+    protected $path = '/spread/export/{code}/edit';
 
     /**
      * {@inheritdoc}
@@ -36,7 +36,7 @@ class Edit extends Form
                     'decorators' => ['Pim\Behat\Decorator\Common\AddAttributeDecorator']
                 ],
                 'Attribute selector' => [
-                    'css'        => '.control-group.attributes',
+                    'css'        => '.AknFieldContainer.attributes',
                     'decorators' => ['Pim\Behat\Decorator\Export\Structure\AttributesDecorator']
                 ]
             ],

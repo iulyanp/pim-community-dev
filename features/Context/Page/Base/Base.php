@@ -7,6 +7,7 @@ use Behat\Mink\Exception\ElementNotFoundException;
 use Behat\Mink\Exception\UnsupportedDriverActionException;
 use Context\FeatureContext;
 use Context\Spin\SpinCapableTrait;
+use Context\Traits\ClosestTrait;
 use Pim\Behat\Decorator\ElementDecorator;
 use SensioLabs\Behat\PageObjectExtension\PageObject\Element;
 use SensioLabs\Behat\PageObjectExtension\PageObject\Page;
@@ -21,6 +22,7 @@ use SensioLabs\Behat\PageObjectExtension\PageObject\Page;
 class Base extends Page
 {
     use SpinCapableTrait;
+    use ClosestTrait;
 
     protected $elements = [
         'Body'             => ['css' => 'body'],
@@ -33,7 +35,7 @@ class Base extends Page
         'Container'        => ['css' => '#container'],
         'Locales dropdown' => ['css' => '#locale-switcher'],
         'Tabs'             => ['css' => '#form-navbar'],
-        'Oro tabs'         => ['css' => '.navbar.scrollspy-nav'],
+        'Oro tabs'         => ['css' => '.navbar.scrollspy-nav, .AknHorizontalNavtab'],
         'Form tabs'        => ['css' => '.nav-tabs.form-tabs'],
         'Active tab'       => ['css' => '.form-horizontal .tab-pane.active'],
     ];
@@ -172,26 +174,15 @@ class Base extends Page
      */
     public function getTitle()
     {
-        $elt = $this->getElement('Title');
+        return $this->spin(function () {
+            $title = $this->find('css', $this->elements['Title']['css']);
 
-        $subtitle  = $elt->find('css', '.AknTitleContainer-title');
-        $separator = $elt->find('css', '.separator');
-        $name      = $elt->find('css', '.product-name');
+            if (null === $title) {
+                $title = $this->find('css', $this->elements['Product title']['css']);
+            }
 
-        if (null === $subtitle || null === $separator || null === $name) {
-            $titleElt = $this->spin(function () {
-                return $this->getElement('Product title')->find('css', '.object-label');
-            }, "Could not find the page title");
-
-            return $titleElt->getText();
-        }
-
-        return sprintf(
-            '%s%s%s',
-            trim($subtitle->getText()),
-            trim($separator->getText()),
-            trim($name->getText())
-        );
+            return $title;
+        }, 'Could not find the page title')->getText();
     }
 
     /**
@@ -204,21 +195,21 @@ class Base extends Page
      */
     public function pressButton($locator, $forceVisible = false)
     {
-        $button = $forceVisible ? $this->getVisibleButton($locator) : $this->getButton($locator);
+        $button = $this->spin(function () use ($locator, $forceVisible) {
+            $result = $forceVisible ? $this->getVisibleButton($locator) : $this->getButton($locator);
 
-        if (null === $button) {
-            $button = $this->find(
-                'named',
-                [
-                    'link',
-                    $this->getSession()->getSelectorsHandler()->xpathLiteral($locator)
-                ]
-            );
-        }
+            if (null === $result) {
+                $result = $this->find(
+                    'named',
+                    [
+                        'link',
+                        $this->getSession()->getSelectorsHandler()->xpathLiteral($locator)
+                    ]
+                );
+            }
 
-        if (null === $button) {
-            throw new ElementNotFoundException($this->getSession(), 'button', 'id|name|title|alt|value', $locator);
-        }
+            return $result;
+        }, sprintf('Can not find any "%s" button', $locator));
 
         $button->click();
     }
@@ -227,16 +218,15 @@ class Base extends Page
      * Get button
      *
      * @param string  $locator
-     * @param boolean $forceVisible
      *
      * @return NodeElement|null
      */
-    public function getButton($locator, $forceVisible = false)
+    public function getButton($locator)
     {
         // Search with exact name at first
-        $button = $this->find('xpath', sprintf("//button[text() = '%s']", $locator));
+        $button = $this->find('xpath', sprintf("//button[normalize-space(text()) = '%s']", $locator));
         if (null === $button) {
-            $button = $this->find('xpath', sprintf("//a[text() = '%s']", $locator));
+            $button = $this->find('xpath', sprintf("//a[normalize-space(text()) = '%s']", $locator));
         }
         if (null === $button) {
             $button = $this->find('css', sprintf('a[title="%s"]', $locator));
@@ -249,23 +239,50 @@ class Base extends Page
     }
 
     /**
-     * Get visible button
+     * Get icon button
      *
      * @param string  $locator
      *
      * @return NodeElement|null
      */
+    public function getIconButton($locator)
+    {
+        $button = null;
+        $icon = $this->find('css', sprintf('i[data-original-title="%s"]', $locator));
+
+        if (null !== $icon) {
+            $button = $this->getClosest($icon, 'AknIconButton');
+        }
+
+        return $button;
+    }
+
+    /**
+     * Get visible button
+     *
+     * @param string $locator
+     *
+     * @return NodeElement|null
+     */
     public function getVisibleButton($locator)
     {
-        $button = $this->getFirstVisible($this->findAll('xpath', sprintf("//button[text() = '%s']", $locator)));
+        $button = $this->getFirstVisible(
+            $this->findAll('xpath', sprintf("//button[normalize-space(text()) = '%s']", $locator))
+        );
         if (null === $button) {
-            $button = $this->getFirstVisible($this->findAll('xpath', sprintf("//a[text() = '%s']", $locator)));
+            $button = $this->getFirstVisible(
+                $this->findAll('xpath', sprintf("//a[normalize-space(text()) = '%s']", $locator))
+            );
         }
         if (null === $button) {
-            $button =  $this->getFirstVisible($this->findAll('css', sprintf('a[title="%s"]', $locator)));
+            $button =  $this->getFirstVisible(
+                $this->findAll('css', sprintf('a[title="%s"]', $locator))
+            );
         }
         if (null === $button) {
-            $button = $this->getFirstVisible($this->findAll('named', array('button', $locator)));
+            $button = $this->getFirstVisible(
+                $this->findAll('named', ['button', $locator])
+            );
         }
 
         return $button;
@@ -334,21 +351,14 @@ class Base extends Page
      */
     public function cancelDialog()
     {
-        $element = $this->getElement('Dialog');
+        $this->spin(function () {
+            $element = $this->getElement('Dialog');
+            if (null === $element) {
+                return null;
+            }
 
-        if (null === $element) {
-            throw new \Exception('Could not find dialog window');
-        }
-
-        // TODO: Use the 'Cancel' button instead of the 'Close' button
-        // (waiting for BAP to get the 'Cancel' button on grid actions)
-        $button = $element->find('css', 'a.close');
-
-        if (null === $button) {
-            throw new \Exception('Could not find the cancel button');
-        }
-
-        $button->click();
+            return $element->find('css', '.cancel');
+        }, 'Could not find the cancel button')->click();
     }
 
     /**
@@ -457,8 +467,9 @@ class Base extends Page
     {
         $tabs = $this->spin(function () {
             return $this->find('css', $this->elements['Tabs']['css']);
-        }, sprintf('Cannot find "%s" element', $this->elements['Tabs']['css']));
+        }, sprintf('Cannot find "%s" tab', $this->elements['Tabs']['css']));
 
+        // Is this dead code?
         if (null === $tabs) {
             $tabs = $this->getElement('Oro tabs');
         }

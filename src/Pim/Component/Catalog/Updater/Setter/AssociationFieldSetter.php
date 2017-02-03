@@ -62,26 +62,54 @@ class AssociationFieldSetter extends AbstractFieldSetter
     public function setFieldData(ProductInterface $product, $field, $data, array $options = [])
     {
         $this->checkData($field, $data);
-        $this->clearAssociations($product);
+        $this->clearAssociations($product, $data);
         $this->addMissingAssociations($product);
         $this->setProductsAndGroupsToAssociations($product, $data);
     }
 
     /**
-     * Clear associations (remove groups and products from existing associations)
+     * Clear only concerned associations (remove groups and products from existing associations)
      *
      * @param ProductInterface $product
+     * @param array            $data
+     *
+     * Expected data input format:
+     * {
+     *     "XSELL": {
+     *         "groups": ["group1", "group2"],
+     *         "products": ["AKN_TS1", "AKN_TSH2"]
+     *     },
+     *     "UPSELL": {
+     *         "groups": ["group3", "group4"],
+     *         "products": ["AKN_TS3", "AKN_TSH4"]
+     *     },
+     * }
      */
-    protected function clearAssociations(ProductInterface $product)
+    protected function clearAssociations(ProductInterface $product, array $data = null)
     {
-        foreach ($product->getAssociations() as $association) {
-            foreach ($association->getGroups() as $group) {
-                $association->removeGroup($group);
-            }
-            foreach ($association->getProducts() as $prod) {
-                $association->removeProduct($prod);
-            }
+        if (null === $data) {
+            return;
         }
+
+        $product->getAssociations()
+            ->filter(function (AssociationInterface $association) use ($data) {
+                return isset($data[$association->getAssociationType()->getCode()]);
+            })
+            ->forAll(function ($key, AssociationInterface $association) use ($data) {
+                $currentData = $data[$association->getAssociationType()->getCode()];
+                if (isset($currentData['products'])) {
+                    foreach ($association->getProducts() as $productToRemove) {
+                        $association->removeProduct($productToRemove);
+                    }
+                }
+                if (isset($currentData['groups'])) {
+                    foreach ($association->getGroups() as $groupToRemove) {
+                        $association->removeGroup($groupToRemove);
+                    }
+                }
+
+                return true;
+            });
     }
 
     /**
@@ -107,8 +135,7 @@ class AssociationFieldSetter extends AbstractFieldSetter
                 throw InvalidArgumentException::expected(
                     'associations',
                     'existing association type code',
-                    'setter',
-                    'association',
+                    static::class,
                     $typeCode
                 );
             }
@@ -133,8 +160,7 @@ class AssociationFieldSetter extends AbstractFieldSetter
                 throw InvalidArgumentException::expected(
                     'associations',
                     'existing product identifier',
-                    'setter',
-                    'association',
+                    static::class,
                     $productIdentifier
                 );
             }
@@ -154,8 +180,7 @@ class AssociationFieldSetter extends AbstractFieldSetter
                 throw InvalidArgumentException::expected(
                     'associations',
                     'existing group code',
-                    'setter',
-                    'association',
+                    static::class,
                     $groupCode
                 );
             }
@@ -176,8 +201,7 @@ class AssociationFieldSetter extends AbstractFieldSetter
         if (!is_array($data)) {
             throw InvalidArgumentException::arrayExpected(
                 $field,
-                'setter',
-                'association',
+                static::class,
                 gettype($data)
             );
         }

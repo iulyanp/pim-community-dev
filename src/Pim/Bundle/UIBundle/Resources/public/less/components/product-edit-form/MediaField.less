@@ -1,0 +1,82 @@
+@import '../../base/variables';
+
+.AknMediaField {
+  @height: 100px;
+
+  height: @height;
+  background: lighten(@AknGrey, 25%);
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 2px;
+
+  &-fileUploaderInput {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  &-emptyContainer {
+    padding-top: @AknMicroProgressBarHeight + 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+  }
+
+  &-preview {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+  }
+
+  &-thumb {
+    flex-basis: @height;
+    margin: 5px 5px 0 5px;
+    text-align: center;
+  }
+
+  &-image {
+    max-height: @height - 24px;
+  }
+
+  &-info {
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  &-progress {
+    flex-basis: @AknMicroProgressBarHeight;
+    opacity: 0;
+    margin: 0 10px 5px;
+  }
+
+  &-icon {
+    font-size: 50px;
+    color: darken(@AknGrey, 10%);
+  }
+
+  &-uploadIcon {
+    height: 50px;
+  }
+
+  &-trashIcon {
+    background: lighten(@AknGrey, 15%);
+    font-size: @AknTitleFontSize;
+    padding: ((@height - @AknTitleFontSize) / 2) 0;
+    position: absolute;
+    height: 100%;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    right: 0;
+    width: 40px;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+  }
+}

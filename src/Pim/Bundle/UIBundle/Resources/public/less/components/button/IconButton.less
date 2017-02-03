@@ -1,0 +1,84 @@
+@import '../../base/variables';
+
+.AknIconButton {
+  color: lighten(@AknGrey, 15%);
+  width: @AknIconSize;
+  height: @AknIconSize;
+  line-height: @AknIconSize;
+  font-size: @AknBigIconFontSize;
+  border: none;
+  background: white;
+  display: inline-block;
+  padding: 0;
+  border-radius: 2px;
+  text-align: center;
+  transition: background 0.1s ease, color 0.1s ease;
+
+  &:hover {
+    background: lighten(@AknGrey, 15%);
+    color: white;
+    cursor: pointer;
+  }
+
+  &--light {
+    background-color: @AknLightGray;
+    border: 1px solid @AknGrey;
+    color: @AknGrey;
+
+    &:hover {
+      background-color: @AknGrey;
+    }
+  }
+
+  &--dark {
+    color: darken(@AknGrey, 30%);
+  }
+
+  &--grey {
+    background-color: @AknGrey;
+    color: white;
+
+    &:hover {
+      background: darken(@AknGrey, 10%);
+    }
+  }
+
+  &--important {
+    background-color: @AknRed;
+    color: white;
+
+    &:hover {
+      background: darken(@AknRed, 10%);
+    }
+  }
+
+  &--gold {
+    color: @AknOrange;
+  }
+
+  &--apply {
+    background-color: @AknGreen;
+    color: white;
+
+    &:hover {
+      background: darken(@AknGreen, 10%);
+    }
+  }
+
+  &--small {
+    font-size: @AknDefaultFontSize;
+    width: @AknMicroButtonSize;
+    height: @AknMicroButtonSize;
+    line-height: @AknMicroButtonSize;
+  }
+
+  &--hide {
+    display: none !important; // Font awesome adds !important
+  }
+
+  &--noFocus {
+    &:focus {
+      outline: none;
+    }
+  }
+}

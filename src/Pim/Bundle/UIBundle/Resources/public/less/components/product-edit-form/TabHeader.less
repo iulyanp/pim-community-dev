@@ -1,0 +1,30 @@
+@import '../../base/variables';
+
+.AknTabHeader {
+  background: lighten(@AknGrey, 30%);
+  border-bottom: 1px solid @AknBorderColor;
+  display: flex;
+  padding: 0 10px;
+  align-items: center;
+  justify-content: space-between;
+
+  &-title {
+    color: @AknPurple;
+    font-size: @AknTitleFontSize;
+    height: @AknTabHeight - 1px;
+    line-height: @AknTabHeight - 1px;
+    margin: 0;
+    font-weight: normal;
+    white-space: nowrap;
+    display: inline-block;
+
+    &:first-letter {
+      text-transform: uppercase;
+    }
+  }
+
+  &-subTitle {
+    color: @AknLightFontColor;
+    font-size: @AknFontSizeBig;
+  }
+}

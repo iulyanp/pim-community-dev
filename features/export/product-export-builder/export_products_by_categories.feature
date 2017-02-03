@@ -47,7 +47,7 @@ Feature: Export products from any given categories
   @skip
   Scenario: Export the products from a tree
     Given the following job "csv_product_export" configuration:
-      | filters | {"structure": {"locales": ["en_US"], "scope": "ecommerce"}, "data": [{"field": "categories.code", "operator": "IN", "value": ["toys_games", "dolls", "women"]}, {"field": "completeness", "operator": ">=", "value": 100,"context":{"locales":["en_US"]}}]} |
+      | filters | {"structure": {"locales": ["en_US"], "scope": "ecommerce"}, "data": [{"field": "categories", "operator": "IN", "value": ["toys_games", "dolls", "women"]}, {"field": "completeness", "operator": ">=", "value": 100,"context":{"locales":["en_US"]}}]} |
     When I am on the "csv_product_export" export job page
     And I launch the export job
     And I wait for the "csv_product_export" job to finish
@@ -72,6 +72,7 @@ Feature: Export products from any given categories
     And I press the "Confirm" button
     Then I should see the text "2 categories selected"
     When I press the "Save" button
+    Then I should not see the text "There are unsaved changes."
     And I am on the "csv_product_export" export job page
     And I launch the export job
     And I wait for the "csv_product_export" job to finish
@@ -86,3 +87,31 @@ Feature: Export products from any given categories
     And I fill in the following information:
       | Channel | Mobile |
     Then I should see the text "All products"
+
+  @jira https://akeneo.atlassian.net/browse/PIM-6027
+  Scenario: Export the products from a tree using the UI with category code as integer
+    Given the following category:
+      | code | label_en_US | parent  |
+      | 1234 | 1234        | default |
+    And the following product:
+      | sku              | categories | family  |
+      | product_numbered | 1234       | default |
+    When I am on the "csv_product_export" export job edit page
+    And I visit the "Content" tab
+    Then I should see the text "All products"
+    When I press the "Select categories" button
+    Then I should see the text "Categories selection"
+    And I should see the text "Master catalog"
+    When I click on the "1234" category
+    And I press the "Confirm" button
+    Then I should see the text "one category selected"
+    When I press the "Save" button
+    Then I should not see the text "There are unsaved changes."
+    And I am on the "csv_product_export" export job page
+    And I launch the export job
+    And I wait for the "csv_product_export" job to finish
+    Then exported file of "csv_product_export" should contain:
+      """
+      sku;categories;enabled;family;groups
+      product_numbered;1234;1;default;
+      """

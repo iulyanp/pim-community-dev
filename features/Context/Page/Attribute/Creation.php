@@ -2,6 +2,7 @@
 
 namespace Context\Page\Attribute;
 
+use Behat\Mink\Element\NodeElement;
 use Context\Page\Base\Form;
 
 /**
@@ -30,7 +31,7 @@ class Creation extends Form
             [
                 'attribute_option_table' => ['css' => '#attribute-option-grid table'],
                 'attribute_options'      => ['css' => '#attribute-option-grid tbody tr'],
-                'add_option_button'      => ['css' => '#attribute-option-grid .btn.option-add'],
+                'add_option_button'      => ['css' => '#attribute-option-grid .option-add'],
                 'new_option'             => ['css' => '.in-edition']
             ]
         );
@@ -58,22 +59,54 @@ class Creation extends Form
     public function addOption($name, array $labels = [])
     {
         if (null === $this->getElement('attribute_option_table')->find('css', '.attribute_option_code')) {
-            $this->getElement('add_option_button')->click();
-
-            $this->spin(function () {
-                return $this->getElement('attribute_option_table')->find('css', '.attribute_option_code');
-            }, 'The click on new option has not added a new line.');
+            $this->createOption();
         }
 
-        $rows = $this->getOptionsElement();
-        $row  = end($rows);
+        $this->fillLastOption($name, $labels);
+        $this->saveLastOption();
+    }
+
+    public function createOption()
+    {
+        $this->spin(function () {
+            $this->getElement('add_option_button')->click();
+
+            return true;
+        }, 'Cannot add a new attribute option');
+
+        $this->spin(function () {
+            return $this->getElement('attribute_option_table')->find('css', '.attribute_option_code');
+        }, 'The click on new option has not added a new line.');
+    }
+
+    /**
+     * @param string $name
+     * @param array  $labels
+     */
+    public function fillLastOption($name, $labels = [])
+    {
+        $row = $this->getLastOption();
 
         $row->find('css', '.attribute_option_code')->setValue($name);
 
         foreach ($labels as $locale => $label) {
             $row->find('css', sprintf('.attribute-option-value[data-locale="%s"]', $locale))->setValue($label);
         }
-        $row->find('css', '.btn.update-row')->click();
+    }
+
+    public function saveLastOption()
+    {
+        $this->getLastOption()->find('css', '.update-row')->click();
+    }
+
+    /**
+     * @return NodeElement
+     */
+    protected function getLastOption()
+    {
+        $rows = $this->getOptionsElement();
+
+        return end($rows);
     }
 
     /**
@@ -88,7 +121,7 @@ class Creation extends Form
 
         $row->find('css', '.edit-row')->click();
         $row->find('css', '.attribute_option_code')->setValue($newValue);
-        $row->find('css', '.btn.update-row')->click();
+        $row->find('css', '.update-row')->click();
     }
 
     /**
@@ -103,7 +136,7 @@ class Creation extends Form
 
         $row->find('css', '.edit-row')->click();
         $row->find('css', '.attribute_option_code')->setValue($newValue);
-        $row->find('css', '.btn.show-row')->click();
+        $row->find('css', '.show-row')->click();
     }
 
     /**
@@ -150,7 +183,7 @@ class Creation extends Form
     public function removeOption($optionName)
     {
         $optionRow = $this->getOptionElement($optionName);
-        $deleteBtn = $optionRow->find('css', '.btn.delete-row');
+        $deleteBtn = $optionRow->find('css', '.delete-row');
 
         if ($deleteBtn === null) {
             throw new \InvalidArgumentException(

@@ -2,6 +2,9 @@
 
 namespace spec\Pim\Component\Catalog\Updater;
 
+use Akeneo\Component\StorageUtils\Exception\ImmutablePropertyException;
+use Akeneo\Component\StorageUtils\Exception\InvalidObjectException;
+use Akeneo\Component\StorageUtils\Exception\InvalidPropertyException;
 use Akeneo\Component\StorageUtils\Updater\ObjectUpdaterInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use PhpSpec\ObjectBehavior;
@@ -53,8 +56,11 @@ class VariantGroupUpdaterSpec extends ObjectBehavior
 
     function it_throws_an_exception_when_trying_to_update_anything_else_than_a_variant_group()
     {
-        $this->shouldThrow(new \InvalidArgumentException('Expects a "Pim\Component\Catalog\Model\GroupInterface", "stdClass" provided.'))->during(
-            'update', [new \stdClass(), []]
+        $this->shouldThrow(
+            InvalidObjectException::objectExpected(
+                'stdClass',
+                'Pim\Component\Catalog\Model\GroupInterface'
+            )
         );
     }
 
@@ -181,8 +187,15 @@ class VariantGroupUpdaterSpec extends ObjectBehavior
             'type' => 'UNKNOWN',
         ];
 
-        $this->shouldThrow(new \InvalidArgumentException('Type "UNKNOWN" does not exist'))
-            ->during('update', [$variantGroup, $values, []]);
+        $this->shouldThrow(
+            InvalidPropertyException::validEntityCodeExpected(
+                'type',
+                'group type',
+                'The group type does not exist',
+                'Pim\Component\Catalog\Updater\VariantGroupUpdater',
+                'UNKNOWN'
+            )
+        )->during('update', [$variantGroup, $values, []]);
     }
 
     function it_throws_an_error_if_axis_is_unknown(GroupInterface $variantGroup)
@@ -195,8 +208,15 @@ class VariantGroupUpdaterSpec extends ObjectBehavior
             'axes' => ['unknown', 'secondary_color'],
         ];
 
-        $this->shouldThrow(new \InvalidArgumentException('Attribute "unknown" does not exist'))
-            ->during('update', [$variantGroup, $values, []]);
+        $this->shouldThrow(
+            InvalidPropertyException::validEntityCodeExpected(
+                'axes',
+                'attribute code',
+                'The attribute does not exist',
+                'Pim\Component\Catalog\Updater\VariantGroupUpdater',
+                'unknown'
+            )
+        )->during('update', [$variantGroup, $values, []]);
     }
 
     function it_throws_an_error_if_axis_is_updated(GroupInterface $variantGroup)
@@ -212,8 +232,14 @@ class VariantGroupUpdaterSpec extends ObjectBehavior
             'axes' => ['main_color'],
         ];
 
-        $this->shouldThrow(new \InvalidArgumentException('Attributes: This property cannot be changed.'))
-            ->during('update', [$variantGroup, $values, []]);
+        $this->shouldThrow(
+            ImmutablePropertyException::immutableProperty(
+                'axes',
+                'main_color',
+                'Pim\Component\Catalog\Updater\VariantGroupUpdater',
+                'variant group'
+            )
+        )->during('update', [$variantGroup, $values, []]);
     }
 
     function it_merges_original_and_new_values(
@@ -237,6 +263,17 @@ class VariantGroupUpdaterSpec extends ObjectBehavior
                     'scope'  => 'ecommerce',
                     'data'   => 'original description de_DE'
                 ]
+            ],
+            'image' => [
+                [
+                    'locale' => 'en_US',
+                    'scope'  => null,
+                    'data'   => [
+                        'originalFilename' => 'originalFilename',
+                        'filePath' => 'originalFilepath',
+                        'hash' => 'originalhash',
+                    ]
+                ]
             ]
         ];
 
@@ -253,6 +290,26 @@ class VariantGroupUpdaterSpec extends ObjectBehavior
                     'data'   => 'new description fr_FR'
                 ]
 
+            ],
+            'image' => [
+                [
+                    'locale' => 'en_US',
+                    'scope'  => null,
+                    'data'   => [
+                        'originalFilename' => 'originalFilename',
+                        'filePath' => 'originalFilepath',
+                        'hash' => 'originalhash',
+                    ]
+                ],
+                [
+                    'locale' => 'de_DE',
+                    'scope'  => null,
+                    'data'   => [
+                        'originalFilename' => 'newFilename',
+                        'filePath' => 'newFilepath',
+                        'hash' => 'newhash',
+                    ]
+                ]
             ]
         ];
 
@@ -272,6 +329,26 @@ class VariantGroupUpdaterSpec extends ObjectBehavior
                     'locale' => 'fr_FR',
                     'scope'  => 'ecommerce',
                     'data'   => 'new description fr_FR'
+                ]
+            ],
+            'image' => [
+                [
+                    'locale' => 'en_US',
+                    'scope'  => null,
+                    'data'   => [
+                        'originalFilename' => 'originalFilename',
+                        'filePath' => 'originalFilepath',
+                        'hash' => 'originalhash',
+                    ]
+                ],
+                [
+                    'locale' => 'de_DE',
+                    'scope'  => null,
+                    'data'   => [
+                        'originalFilename' => 'newFilename',
+                        'filePath' => 'newFilepath',
+                        'hash' => 'newhash',
+                    ]
                 ]
             ]
         ];

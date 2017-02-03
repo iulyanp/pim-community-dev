@@ -10,7 +10,6 @@ use Pim\Bundle\CatalogBundle\Entity\Category;
 use Pim\Bundle\CatalogBundle\Entity\Family;
 use Pim\Component\Catalog\Model\AssociationTypeInterface;
 use Pim\Component\Catalog\Model\AttributeGroupInterface;
-use Pim\Component\Catalog\Model\GroupInterface;
 use Pim\Component\Catalog\Model\GroupTypeInterface;
 use Pim\Component\Catalog\Model\Product;
 
@@ -66,16 +65,34 @@ class NavigationContext extends BaseNavigationContext
     }
 
     /**
+     * @todo remove when all routes will use `code` for identifier
      * @param string $identifier
      *
      * @Given /^I edit the "([^"]*)" association type$/
+     * @Given /^I am on the "([^"]*)" association type page$/
      */
     public function iEditTheAssociationType($identifier)
     {
         $page   = 'AssociationType';
-        $getter = sprintf('get%s', $page);
-        $entity = $this->getFixturesContext()->$getter($identifier);
-        $this->openPage(sprintf('%s edit', $page), ['id' => $entity->getId()]);
+        $this->openPage(sprintf('%s edit', $page), ['code' => $identifier]);
+    }
+
+    /**
+     * @param string $code
+     *
+     * @Then /^I should be redirected to the "([^"]*)" channel page$/
+     */
+    public function shouldBeRedirectedToTheChannel($code)
+    {
+        $url = str_replace('{code}', $code, $this->getPage('Channel edit')->getUrl());
+
+        $this->spin(function () use ($url) {
+            $actualFullUrl = $this->getSession()->getCurrentUrl();
+            $result = (bool) strpos($actualFullUrl, $url);
+            assertTrue($result, sprintf('Expecting to be on page "%s", not "%s"', $url, $actualFullUrl));
+
+            return true;
+        }, "Expected to be redirected to channel '%s'", $url);
     }
 
     /**
@@ -95,7 +112,7 @@ class NavigationContext extends BaseNavigationContext
      */
     public function iAmOnTheExportJobPage(JobInstance $job)
     {
-        $this->openPage('Export show', ['id' => $job->getId()]);
+        $this->openPage('Export show', ['code' => $job->getCode()]);
     }
 
     /**
@@ -105,7 +122,7 @@ class NavigationContext extends BaseNavigationContext
      */
     public function iAmOnTheExportJobEditPage(JobInstance $job)
     {
-        $this->openPage('Export edit', ['id' => $job->getId()]);
+        $this->openPage('Export edit', ['code' => $job->getCode()]);
     }
 
     /**
@@ -118,7 +135,6 @@ class NavigationContext extends BaseNavigationContext
     {
         $jobType = ucfirst($jobType);
         $this->getPage(sprintf('%s index', $jobType))->clickJobCreationLink($jobTitle);
-        $this->wait();
         $this->currentPage = sprintf('%s creation', $jobType);
     }
 
@@ -131,19 +147,6 @@ class NavigationContext extends BaseNavigationContext
     public function iAmOnTheGroupTypeEditPage($identifier)
     {
         $page   = 'GroupType';
-        $getter = sprintf('get%s', $page);
-        $entity = $this->getFixturesContext()->$getter($identifier);
-        $this->openPage(sprintf('%s edit', $page), ['id' => $entity->getId()]);
-    }
-
-    /**
-     * @param string $identifier
-     *
-     * @Given /^I am on the "([^"]*)" association type page$/
-     */
-    public function iAmOnTheAssociationTypeEditPage($identifier)
-    {
-        $page   = 'AssociationType';
         $getter = sprintf('get%s', $page);
         $entity = $this->getFixturesContext()->$getter($identifier);
         $this->openPage(sprintf('%s edit', $page), ['id' => $entity->getId()]);
@@ -181,7 +184,7 @@ class NavigationContext extends BaseNavigationContext
     public function iShouldBeOnTheJobPage(JobInstance $job)
     {
         $jobPage         = sprintf('%s show', ucfirst($job->getType()));
-        $expectedAddress = $this->getPage($jobPage)->getUrl(['id' => $job->getId()]);
+        $expectedAddress = $this->getPage($jobPage)->getUrl(['code' => $job->getCode()]);
         $this->assertAddress($expectedAddress);
     }
 
@@ -193,7 +196,7 @@ class NavigationContext extends BaseNavigationContext
     public function iShouldBeOnTheJobEditPage(JobInstance $job)
     {
         $jobPage         = sprintf('%s edit', ucfirst($job->getType()));
-        $expectedAddress = $this->getPage($jobPage)->getUrl(['id' => $job->getId()]);
+        $expectedAddress = $this->getPage($jobPage)->getUrl(['code' => $job->getCode()]);
         $this->assertAddress($expectedAddress);
     }
 
@@ -245,7 +248,7 @@ class NavigationContext extends BaseNavigationContext
      */
     public function iShouldBeOnTheAssociationTypePage(AssociationTypeInterface $associationType)
     {
-        $expectedAddress = $this->getPage('AssociationType edit')->getUrl(['id' => $associationType->getId()]);
+        $expectedAddress = $this->getPage('AssociationType edit')->getUrl(['code' => $associationType->getCode()]);
         $this->assertAddress($expectedAddress);
     }
 
@@ -333,7 +336,7 @@ class NavigationContext extends BaseNavigationContext
         }, sprintf('Cannot find product "%s"', $product->getId()));
 
         $this->getMainContext()->spin(function () {
-            return $this->getCurrentPage()->find('css', '.object-label');
+            return $this->getCurrentPage()->find('css', '.AknTitleContainer-title');
         }, 'Can not find any product label');
     }
 

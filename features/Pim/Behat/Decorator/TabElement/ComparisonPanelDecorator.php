@@ -13,7 +13,7 @@ class ComparisonPanelDecorator extends ElementDecorator
     use SpinCapableTrait;
 
     protected $selectors = [
-        'Change selection dropdown' => '.attribute-copy-actions .selection-dropdown .dropdown-toggle',
+        'Change selection dropdown' => '.attribute-copy-actions .selection-dropdown *[data-toggle="dropdown"]',
         'Copy selected button'      => '.attribute-copy-actions .copy',
         'Copy source dropdown'      => '.attribute-copy-actions .source-switcher',
     ];
@@ -55,12 +55,12 @@ class ComparisonPanelDecorator extends ElementDecorator
         }, 'Cannot find the comparison source dropdown');
 
         $toggle = $this->spin(function () use ($dropdown) {
-            return $dropdown->find('css', '.dropdown-toggle');
+            return $dropdown->find('css', '.AknActionButton');
         }, 'Could not find copy source switcher.');
         $toggle->click();
 
         $option = $this->spin(function () use ($dropdown, $source) {
-            return $dropdown->find('css', sprintf('a[data-source="%s"]', $source));
+            return $dropdown->find('css', sprintf('.AknDropdown-menuLink[data-source="%s"]', $source));
         }, sprintf('Could not find source "%s" in switcher', $source));
         $option->click();
     }

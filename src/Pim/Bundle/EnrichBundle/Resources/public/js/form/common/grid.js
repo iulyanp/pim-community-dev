@@ -20,6 +20,7 @@ define([
     ) {
         return Backbone.View.extend({
             template: _.template(template),
+            className: 'AknTabContainer-content--fullWidth',
 
             /**
              * {@inheritdoc}
@@ -59,9 +60,10 @@ define([
              * @param {Object} params
              */
             renderGrid: function (alias, params) {
-                var urlParams    = params;
+                var urlParams    = $.extend(true, {}, params);
                 urlParams.alias  = alias;
-                urlParams.params = _.clone(params);
+                urlParams.params = $.extend(true, {}, params);
+                urlParams[alias] = $.extend(true, {}, params);
 
                 $.get(Routing.generate('pim_datagrid_load', urlParams)).then(function (response) {
                     this.$el.find('.grid-drop').data({

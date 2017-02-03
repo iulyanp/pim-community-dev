@@ -7,8 +7,8 @@ Feature: Export products according to text attribute filter
   Background:
     Given a "footwear" catalog configuration
     And the following family:
-      | code    | requirements-mobile |
-      | rangers | sku, name           |
+      | code    | requirements-mobile | attributes |
+      | rangers | sku                 | comment    |
     And the following products:
       | sku      | enabled | family  | categories        | comment         | name-en_US |
       | SNKRS-1B | 1       | rangers | summer_collection | Awesome         |            |
@@ -152,7 +152,8 @@ Feature: Export products according to text attribute filter
     And I switch the locale from "name" filter to "en_US"
     Then I filter by "name" with operator "Contains" and value "Ranger"
     And I filter by "completeness" with operator "No condition on completeness" and value ""
-    And I press "Save"
+    When I press "Save"
+    Then I should not see the text "There are unsaved changes"
     When I am on the "csv_footwear_product_export" export job page
     And I launch the export job
     And I wait for the "csv_footwear_product_export" job to finish

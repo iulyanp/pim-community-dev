@@ -9,6 +9,7 @@ Feature: Edit attribute options
     And I am logged in as "Julia"
     And I am on the attributes page
     And I create a "Simple select" attribute
+    And I scroll down
     And I fill in the following information:
       | Code            | size  |
       | Attribute group | Other |
@@ -42,3 +43,14 @@ Feature: Edit attribute options
     And I edit the "green" option and turn it to "yellow"
     Then I should see "yellow"
     Then I should not see "green"
+
+  @jira https://akeneo.atlassian.net/browse/PIM-6002
+  Scenario: Successfully edit an attribute option value containing a quote
+    Given I create the following attribute options:
+      | Code  | en_US |
+      | red   | r"ed  |
+      | blue  | blue  |
+      | green | green |
+    And I save the attribute
+    And I edit the code "red" to turn it to "red" and cancel
+    Then I should see the text "r\"ed"

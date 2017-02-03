@@ -4,7 +4,7 @@ namespace Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter;
 
 use Akeneo\Component\Batch\Job\BatchStatus;
 use Akeneo\Component\Batch\Job\JobRepositoryInterface;
-use Pim\Bundle\ImportExportBundle\Entity\Repository\JobInstanceRepository;
+use Akeneo\Component\StorageUtils\Repository\IdentifiableObjectRepositoryInterface;
 use Pim\Component\Catalog\Exception\InvalidArgumentException;
 use Pim\Component\Catalog\Query\Filter\FieldFilterInterface;
 use Pim\Component\Catalog\Query\Filter\Operators;
@@ -23,17 +23,17 @@ class DateTimeFilter extends AbstractFieldFilter implements FieldFilterInterface
     /** @var JobRepositoryInterface */
     protected $jobRepository;
 
-    /** @var JobInstanceRepository */
+    /** @var IdentifiableObjectRepositoryInterface */
     protected $jobInstanceRepository;
 
     /**
-     * @param JobInstanceRepository  $jobInstanceRepository
-     * @param JobRepositoryInterface $jobRepository
-     * @param array                  $supportedFields
-     * @param array                  $supportedOperators
+     * @param IdentifiableObjectRepositoryInterface $jobInstanceRepository
+     * @param JobRepositoryInterface                $jobRepository
+     * @param array                                 $supportedFields
+     * @param array                                 $supportedOperators
      */
     public function __construct(
-        JobInstanceRepository $jobInstanceRepository,
+        IdentifiableObjectRepositoryInterface $jobInstanceRepository,
         JobRepositoryInterface $jobRepository,
         array $supportedFields = [],
         array $supportedOperators = []
@@ -52,7 +52,7 @@ class DateTimeFilter extends AbstractFieldFilter implements FieldFilterInterface
         switch ($operator) {
             case Operators::SINCE_LAST_JOB:
                 if (!is_string($value)) {
-                    throw InvalidArgumentException::stringExpected($field, 'filter', 'updated', gettype($value));
+                    throw InvalidArgumentException::stringExpected($field, static::class, gettype($value));
                 }
 
                 $this->addUpdatedSinceLastJob($field, $value);
@@ -60,7 +60,7 @@ class DateTimeFilter extends AbstractFieldFilter implements FieldFilterInterface
 
             case Operators::SINCE_LAST_N_DAYS:
                 if (!is_numeric($value)) {
-                    throw InvalidArgumentException::numericExpected($field, 'filter', 'updated', gettype($value));
+                    throw InvalidArgumentException::numericExpected($field, static::class, gettype($value));
                 }
 
                 $this->addSinceLastNDays($field, $value);
@@ -119,7 +119,7 @@ class DateTimeFilter extends AbstractFieldFilter implements FieldFilterInterface
      */
     protected function addUpdatedSinceLastJob($field, $value)
     {
-        $jobInstance = $this->jobInstanceRepository->findOneBy(['code' => $value]);
+        $jobInstance = $this->jobInstanceRepository->findOneByIdentifier($value);
         $lastCompletedJobExecution = $this->jobRepository->getLastJobExecution($jobInstance, BatchStatus::COMPLETED);
         if (null === $lastCompletedJobExecution) {
             return;
@@ -162,8 +162,7 @@ class DateTimeFilter extends AbstractFieldFilter implements FieldFilterInterface
             throw InvalidArgumentException::expected(
                 $type,
                 'array with 2 elements, string or \DateTime',
-                'filter',
-                'date',
+                static::class,
                 print_r($value, true)
             );
         }
@@ -207,8 +206,7 @@ class DateTimeFilter extends AbstractFieldFilter implements FieldFilterInterface
                 throw InvalidArgumentException::expected(
                     $type,
                     'a string with the format yyyy-mm-dd H:i:s',
-                    'filter',
-                    'date',
+                    static::class,
                     $value
                 );
             }
@@ -219,8 +217,7 @@ class DateTimeFilter extends AbstractFieldFilter implements FieldFilterInterface
         throw InvalidArgumentException::expected(
             $type,
             'array with 2 elements, string or \DateTime',
-            'filter',
-            'date',
+            static::class,
             print_r($value, true)
         );
     }

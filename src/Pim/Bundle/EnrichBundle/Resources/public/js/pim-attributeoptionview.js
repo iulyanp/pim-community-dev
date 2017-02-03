@@ -8,9 +8,24 @@ define(
         'oro/mediator',
         'oro/loading-mask',
         'pim/dialog',
+        'text!pim/template/attribute-option/index',
+        'text!pim/template/attribute-option/edit',
+        'text!pim/template/attribute-option/show',
         'jquery-ui'
     ],
-    function ($, _, Backbone, __, Routing, mediator, LoadingMask, Dialog) {
+    function (
+        $,
+        _,
+        Backbone,
+        __,
+        Routing,
+        mediator,
+        LoadingMask,
+        Dialog,
+        indexTemplate,
+        editTemplate,
+        showTemplate
+    ) {
         'use strict';
 
         var AttributeOptionItem = Backbone.Model.extend({
@@ -29,47 +44,9 @@ define(
 
         var EditableItemView = Backbone.View.extend({
             tagName: 'tr',
-            className: 'editable-item-row',
-            showTemplate: _.template(
-                '<td>' +
-                    '<span class="handle"><i class="icon-reorder"></i></span>' +
-                    '<span class="option-code"><%= item.code %></span>' +
-                '</td>' +
-                '<% _.each(locales, function (locale) { %>' +
-                '<td >' +
-                    '<% if (item.optionValues[locale]) { %>' +
-                        '<span title="<%= item.optionValues[locale].value %>">' +
-                            '<%= item.optionValues[locale].value %>' +
-                        '</span>' +
-                    '<% } %>' +
-                '</td>' +
-                '<% }); %>' +
-                '<td>' +
-                    '<span class="btn btn-small edit-row"><i class="icon-pencil"></i></span>' +
-                    '<span class="btn btn-small delete-row"><i class="icon-trash"></i></span>' +
-                '</td>'
-            ),
-            editTemplate: _.template(
-                '<td class="field-cell">' +
-                    '<input type="text" class="attribute_option_code exclude" value="<%= item.code %>"/>' +
-                    '<i class="validation-tooltip hidden" data-placement="top" data-toggle="tooltip"></i>' +
-                '</td>' +
-                '<% _.each(locales, function (locale) { %>' +
-                '<td class="field-cell">' +
-                    '<% if (item.optionValues[locale]) { %>' +
-                        '<input type="text" class="attribute-option-value exclude" data-locale="<%= locale %>" ' +
-                            'value="<%= item.optionValues[locale].value %>"/>' +
-                    '<% } else { %>' +
-                        '<input type="text" class="attribute-option-value exclude" data-locale="<%= locale %>" ' +
-                            'value=""/>' +
-                    '<% } %>' +
-                '</td>' +
-                '<% }); %>' +
-                '<td>' +
-                    '<span class="btn btn-small update-row"><i class="icon-ok"></i></span>' +
-                    '<span class="btn btn-small show-row"><i class="icon-remove"></i></span>' +
-                '</td>'
-            ),
+            className: 'AknGrid-bodyRow editable-item-row',
+            showTemplate: _.template(showTemplate),
+            editTemplate: _.template(editTemplate),
             events: {
                 'click .show-row':   'stopEditItem',
                 'click .edit-row':   'startEditItem',
@@ -189,7 +166,7 @@ define(
                             ) {
                                 var message = response.children.code.errors.join('<br/>');
                                 this.$el.find('.validation-tooltip')
-                                    .addClass('visible')
+                                    .removeClass('AknIconButton--hide')
                                     .tooltip('destroy')
                                     .tooltip({title: message})
                                     .tooltip('show');
@@ -250,7 +227,7 @@ define(
 
         var ItemCollectionView = Backbone.View.extend({
             tagName: 'table',
-            className: 'table table-bordered table-stripped attribute-option-view',
+            className: 'AknGrid table attribute-option-view',
             template: _.template(
                 '<!-- Pim/Bundle/EnrichBundle/Resources/public/js/pim-attributeoptionview.js -->' +
                 '<colgroup>' +
@@ -260,20 +237,22 @@ define(
                 '</colgroup>' +
                 '<thead>' +
                     '<tr>' +
-                        '<th><%= code_label %></th>' +
+                        '<th class="AknGrid-headerCell"><%= code_label %></th>' +
                         '<% _.each(locales, function (locale) { %>' +
-                        '<th>' +
+                        '<th class="AknGrid-headerCell">' +
                             '<%= locale %>' +
                         '</th>' +
                         '<% }); %>' +
-                        '<th>Action</th>' +
+                        '<th class="AknGrid-headerCell AknGrid-headerCell--right">Action</th>' +
                     '</tr>' +
                 '</thead>' +
                 '<tbody></tbody>' +
                 '<tfoot>' +
-                    '<tr>' +
-                        '<td colspan="<%= 2 + locales.length %>">' +
-                            '<span class="btn option-add pull-right"><%= add_option_label %></span>' +
+                    '<tr class="AknGrid-bodyRow">' +
+                        '<td class="AknGrid-bodyCell AknGrid-bodyCell--right" colspan="<%= 2 + locales.length %>">' +
+                            '<span class="AknButton AknButton--grey AknButton--small option-add">' +
+                                '<%= add_option_label %>' +
+                            '</span>' +
                         '</td>' +
                     '</tr>' +
                 '</tfoot>'
@@ -412,7 +391,11 @@ define(
                     }
                 }
 
-                this.currentlyEditedItemView = attributeOptionRow;
+                if (attributeOptionRow.model.id)
+                {
+                    this.currentlyEditedItemView = attributeOptionRow;
+                }
+
                 this.updateEditionStatus();
 
                 return true;

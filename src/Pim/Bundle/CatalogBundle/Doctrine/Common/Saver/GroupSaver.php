@@ -100,13 +100,17 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
     {
         $this->validateGroup($group);
 
-        $this->eventDispatcher->dispatch(StorageEvents::PRE_SAVE, new GenericEvent($group));
-
         $options = $this->optionsResolver->resolveSaveOptions($options);
+
+        $this->eventDispatcher->dispatch(StorageEvents::PRE_SAVE, new GenericEvent($group, $options));
 
         $this->persistGroup($group, $options);
 
         $this->objectManager->flush();
+
+        if ($group->getType()->isVariant() && true === $options['copy_values_to_products']) {
+            $this->copyVariantGroupValues($group);
+        }
 
         $this->eventDispatcher->dispatch(StorageEvents::POST_SAVE, new GenericEvent($group));
     }
@@ -120,9 +124,9 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
             return;
         }
 
-        $this->eventDispatcher->dispatch(StorageEvents::PRE_SAVE_ALL, new GenericEvent($groups));
-
         $options = $this->optionsResolver->resolveSaveAllOptions($options);
+
+        $this->eventDispatcher->dispatch(StorageEvents::PRE_SAVE_ALL, new GenericEvent($groups, $options));
 
         foreach ($groups as $group) {
             $this->validateGroup($group);
@@ -168,7 +172,7 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
 
         if (null !== $group->getId()) {
             $pqb = $this->productQueryBuilderFactory->create();
-            $pqb->addFilter('groups.id', Operators::IN_LIST, [$group->getId()]);
+            $pqb->addFilter('groups', Operators::IN_LIST, [$group->getCode()]);
             $oldProducts = $pqb->execute();
             foreach ($oldProducts as $oldProduct) {
                 if (!in_array($oldProduct->getId(), $productToUpdateIds)) {

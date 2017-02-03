@@ -5,11 +5,11 @@ namespace spec\Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter;
 use Akeneo\Component\Batch\Job\JobRepositoryInterface;
 use Akeneo\Component\Batch\Model\JobExecution;
 use Akeneo\Component\Batch\Model\JobInstance;
+use Akeneo\Component\StorageUtils\Repository\IdentifiableObjectRepositoryInterface;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\QueryBuilder;
 use PhpSpec\ObjectBehavior;
-use Pim\Bundle\ImportExportBundle\Entity\Repository\JobInstanceRepository;
 use Pim\Component\Catalog\Exception\InvalidArgumentException;
 use Prophecy\Argument;
 
@@ -17,7 +17,7 @@ class DateTimeFilterSpec extends ObjectBehavior
 {
     function let(
         QueryBuilder $qb,
-        JobInstanceRepository $jobInstanceRepository,
+        IdentifiableObjectRepositoryInterface $jobInstanceRepository,
         JobRepositoryInterface $jobRepository
     ) {
         $this->beConstructedWith(
@@ -228,7 +228,7 @@ class DateTimeFilterSpec extends ObjectBehavior
         Expr $expr,
         Comparison $comparison
     ) {
-        $jobInstanceRepository->findOneBy(['code' => 'csv_product_export'])->willReturn($jobInstance);
+        $jobInstanceRepository->findOneByIdentifier('csv_product_export')->willReturn($jobInstance);
         $jobRepository->getLastJobExecution($jobInstance, 1)->shouldBeCalled()->willReturn($jobExecution);
 
         $jobExecution->getStartTime()->willReturn($startTime);
@@ -257,7 +257,7 @@ class DateTimeFilterSpec extends ObjectBehavior
         $jobRepository,
         JobInstance $jobInstance
     ) {
-        $jobInstanceRepository->findOneBy(['code' => 'csv_product_export'])->willReturn($jobInstance);
+        $jobInstanceRepository->findOneByIdentifier('csv_product_export')->willReturn($jobInstance);
         $jobRepository->getLastJobExecution($jobInstance, 1)->shouldBeCalled()->willReturn(null);
 
         $qb->andWhere(Argument::cetera())->shouldNotBeCalled();
@@ -275,7 +275,11 @@ class DateTimeFilterSpec extends ObjectBehavior
     {
         $this
             ->shouldThrow(
-                InvalidArgumentException::stringExpected('updated', 'filter', 'updated', 'integer')
+                InvalidArgumentException::stringExpected(
+                    'updated',
+                    'Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter\DateTimeFilter',
+                    'integer'
+                )
             )->during(
                 'addFieldFilter',
                 [
@@ -292,7 +296,11 @@ class DateTimeFilterSpec extends ObjectBehavior
     {
         $this
             ->shouldThrow(
-                InvalidArgumentException::numericExpected('updated', 'filter', 'updated', 'string')
+                InvalidArgumentException::numericExpected(
+                    'updated',
+                    'Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter\DateTimeFilter',
+                    'string'
+                )
             )->during(
                 'addFieldFilter',
                 [
@@ -308,14 +316,24 @@ class DateTimeFilterSpec extends ObjectBehavior
     function it_throws_an_exception_if_value_is_not_a_string_an_array_or_a_datetime()
     {
         $this->shouldThrow(
-            InvalidArgumentException::expected('updated_at', 'array with 2 elements, string or \DateTime', 'filter', 'date', print_r(123, true))
+            InvalidArgumentException::expected(
+                'updated_at',
+                'array with 2 elements, string or \DateTime',
+                'Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter\DateTimeFilter',
+                print_r(123, true)
+            )
         )->during('addFieldFilter', ['updated_at', '>', 123]);
     }
 
     function it_throws_an_error_if_data_is_not_a_valid_date_format()
     {
         $this->shouldThrow(
-            InvalidArgumentException::expected('updated_at', 'a string with the format yyyy-mm-dd H:i:s', 'filter', 'date', 'not a valid date format')
+            InvalidArgumentException::expected(
+                'updated_at',
+                'a string with the format yyyy-mm-dd H:i:s',
+                'Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter\DateTimeFilter',
+                'not a valid date format'
+            )
         )->during('addFieldFilter', ['updated_at', '>', ['not a valid date format', 'WRONG']]);
     }
 
@@ -325,8 +343,7 @@ class DateTimeFilterSpec extends ObjectBehavior
             InvalidArgumentException::expected(
                 'updated_at',
                 'array with 2 elements, string or \DateTime',
-                'filter',
-                'date',
+                'Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter\DateTimeFilter',
                 123
             )
         )->during('addFieldFilter', ['updated_at', '>', [123, 123]]);
@@ -338,8 +355,7 @@ class DateTimeFilterSpec extends ObjectBehavior
             InvalidArgumentException::expected(
                 'updated_at',
                 'array with 2 elements, string or \DateTime',
-                'filter',
-                'date',
+                'Pim\Bundle\CatalogBundle\Doctrine\ORM\Filter\DateTimeFilter',
                 print_r([123, 123, 'three'], true)
             )
         )->during('addFieldFilter', ['updated_at', '>', [123, 123, 'three']]);

@@ -1,0 +1,50 @@
+@import '../../base/variables';
+
+.AknButtonList {
+  @marginSpace: 6px;
+
+  display: flex;
+  align-items: center;
+
+  &-item {
+    margin-right: @marginSpace;
+
+    &--hide {
+      display: none;
+    }
+  }
+
+  &--hide {
+    display: none;
+  }
+
+  &--right {
+    justify-content: flex-end;
+  }
+
+  &--right &-item {
+    margin-right: 0;
+    margin-left: @marginSpace;
+  }
+
+  &--centered {
+    justify-content: center;
+  }
+
+  &--centered &-item {
+    margin-right: @marginSpace / 2;
+    margin-left: @marginSpace / 2;
+  }
+
+  &--twoColumns {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  &--twoColumns &-item {
+    margin-left: 0;
+    margin-right: 0;
+    flex-basis: ~"calc(50% - 5px)";
+    margin-bottom: 10px;
+  }
+}

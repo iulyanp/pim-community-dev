@@ -13,6 +13,7 @@
     display: flex;
     flex-direction: column;
     opacity: 0.4;
+    transition: background 0.2s ease;
 
     &:hover {
       background: @AknDefaultHoverBackground;
@@ -38,15 +39,37 @@
     position: relative;
 
     &--import, &--massUpload {
-      background-image: url("/bundles/pimui/images/icon-import.svg");
+      background-image: url("../../images/icon-import.svg");
     }
 
     &--export, &--quickExport {
-      background-image: url("/bundles/pimui/images/icon-export.svg");
+      background-image: url("../../images/icon-export.svg");
     }
 
     &--massEdit {
-      background-image: url("/bundles/pimui/images/icon-edit.svg");
+      background-image: url("../../images/icon-edit.svg");
+    }
+
+    &--pimeeWorkflowProductDraftNotificationNewProposal,
+    &--pimeeWorkflowProductDraftNotificationPartialApprove,
+    &--pimeeWorkflowProductDraftNotificationPartialReject,
+    &--pimeeWorkflowProductDraftNotificationPartialRemove,
+    &--pimeeWorkflowProductDraftNotificationApprove,
+    &--pimeeWorkflowProductDraftNotificationRefuse,
+    &--pimeeWorkflowProductDraftNotificationRemove {
+      background-image: url("../../images/icon-proposal.svg");
+    }
+
+    &--pimeeWorkflowImportNotificationNewProposals {
+      background-image: url("../../images/icon-import-proposals.svg");
+    }
+
+    &--rule {
+      background-image: url("../../images/icon-rules.svg");
+    }
+
+    &--projectCalculation {
+      background-image: url("../../images/icon-import.svg"); // TODO Replace by custom icon
     }
   }
 
@@ -61,7 +84,9 @@
     color: white;
     text-align: center;
 
-    &--success, &--add {
+    &--apply,
+    &--add,
+    &--success {
       background: @AknGreen;
     }
 
@@ -105,6 +130,11 @@
     padding: 16px;
     margin-bottom: 16px;
     width: 100%;
+    transition: background 0.2s ease;
+  }
+
+  &:hover &-comment {
+    background: darken(@AknLightGray, 10%);
   }
 
   &-button {

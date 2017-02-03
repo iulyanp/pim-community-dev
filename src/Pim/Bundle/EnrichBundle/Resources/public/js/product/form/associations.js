@@ -48,7 +48,7 @@ define(
             className: 'tab-pane active product-associations',
             events: {
                 'click .associations-list li': 'changeAssociationType',
-                'click .AknTitleContainer .target-button': 'changeAssociationTargets'
+                'click .AknTabHeader .target-button': 'changeAssociationTargets'
             },
             initialize: function () {
                 state = {
@@ -105,10 +105,12 @@ define(
                 });
 
                 _.each(this.datagrids, function (datagrid) {
+                    mediator.clear('datagrid:selectModel:' + datagrid.name);
                     mediator.on('datagrid:selectModel:' + datagrid.name, function (model) {
                         this.selectModel(model, datagrid);
                     }.bind(this));
 
+                    mediator.clear('datagrid:unselectModel:' + datagrid.name);
                     mediator.on('datagrid:unselectModel:' + datagrid.name, function (model) {
                         this.unselectModel(model, datagrid);
                     }.bind(this));
@@ -231,15 +233,16 @@ define(
                 this.setCurrentAssociationType(associationType);
 
                 $(event.currentTarget)
-                    .addClass('active')
-                    .siblings('.active')
-                    .removeClass('active');
+                    .addClass('active AknVerticalNavtab-item--active')
+                    .siblings('.active.AknVerticalNavtab-item--active')
+                    .removeClass('active AknVerticalNavtab-item--active');
 
                 this.$('.AknTitleContainer.association-type[data-association-type="' + associationType + '"]')
                     .removeClass('AknTitleContainer--hidden')
                     .siblings('.AknTitleContainer.association-type:not(.AknTitleContainer--hidden)')
                     .addClass('AknTitleContainer--hidden');
 
+                this.renderPanes();
                 this.updateListenerSelectors();
 
                 var currentGrid = this.datagrids[this.getCurrentAssociationTarget()];
@@ -261,9 +264,9 @@ define(
                 }.bind(this));
 
                 $(event.currentTarget)
-                    .addClass('hide')
+                    .addClass('AknButton--hidden')
                     .siblings('.target-button')
-                    .removeClass('hide');
+                    .removeClass('AknButton--hidden');
 
                 this.updateListenerSelectors();
 
@@ -289,10 +292,34 @@ define(
                     collection.processFiltersParams(urlParams, filters, gridName + '[_filter]');
                 }
 
-                $.get(Routing.generate('pim_datagrid_load', urlParams)).then(function (resp) {
-                    this.$('#grid-' + gridName).data({ 'metadata': resp.metadata, 'data': JSON.parse(resp.data) });
+                $.get(Routing.generate('pim_datagrid_load', urlParams)).then(function (response) {
+                    var metadata = response.metadata;
+                    /* Next lines are related to PIM-6113 and need some comments.
+                     *
+                     * When you just saved a datagrid from the Product Edit Form, you will have an URL like
+                     * '/association-group-grid?...&associatedIds[]=1&associatedIds[]=2', in reference of the last
+                     * checked groups in the datagrid.
+                     *
+                     * The fact is that there is 2 places where these parameters are set: in the URL, and in the
+                     * datagrid state (state.parameters.associatedIds).
+                     *
+                     * If you do not drop the params of the URL (containing associatedIds array), you will have
+                     * a mix of 2 times the same variable, defined at 2 different places. This leads to a refreshed
+                     * datagrid with wrong checkboxes.
+                     *
+                     * To prevent this behavior, we removed the parameters passed in the URL before rendering the
+                     * grid, to only allow datagrid state parameters.
+                     */
+                    var queryParts = metadata.options.url.split('?');
+                    var url = queryParts[0];
+                    var queryString = decodeURIComponent(queryParts[1])
+                        .replace(/&?association-group-grid\[associatedIds\]\[\d+\]=\d+/g, '')
+                        .replace(/^&/, '');
+                    metadata.options.url = url + '?' + queryString;
 
-                    var gridModules = resp.metadata.requireJSModules;
+                    this.$('#grid-' + gridName).data({ metadata: metadata, data: JSON.parse(response.data) });
+
+                    var gridModules = metadata.requireJSModules;
                     gridModules.push('pim/datagrid/state-listener');
                     require(gridModules, function () {
                         datagridBuilder(_.toArray(arguments));

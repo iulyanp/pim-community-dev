@@ -19,7 +19,7 @@ define([
     return BaseFilter.extend({
         shortname: 'category',
         template: _.template(template),
-        className: 'control-group filter-item category-filter',
+        className: 'AknFieldContainer control-group filter-item category-filter',
         events: {
             'click button': 'openSelector'
         },
@@ -30,7 +30,7 @@ define([
         configure: function () {
             this.listenTo(this, 'channel:update:after', this.channelUpdated.bind(this));
             this.listenTo(this.getRoot(), 'pim_enrich:form:entity:pre_update', function (data) {
-                _.defaults(data, {field: this.getCode() + '.code', operator: 'IN CHILDREN', value: []});
+                _.defaults(data, {field: this.getCode(), operator: 'IN CHILDREN', value: []});
             }.bind(this));
 
             return BaseFilter.prototype.configure.apply(this, arguments);
@@ -99,7 +99,7 @@ define([
             var tree = new CategoryTree({
                 el: modal.$el.find('.modal-body'),
                 attributes: {
-                    channel: this.getParentForm().getFormData().structure.scope,
+                    channel: this.getParentForm().getFilters().structure.scope,
                     categories: 'IN CHILDREN' === this.getOperator() ? [] : this.getValue()
                 }
             });
@@ -146,7 +146,7 @@ define([
          */
         getCurrentChannel: function () {
             return fetcherRegistry.getFetcher('channel')
-                .fetch(this.getParentForm().getFormData().structure.scope);
+                .fetch(this.getParentForm().getFilters().structure.scope);
         },
 
         /**

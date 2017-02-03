@@ -5,9 +5,9 @@ namespace spec\Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\Filter;
 use Akeneo\Component\Batch\Job\JobRepositoryInterface;
 use Akeneo\Component\Batch\Model\JobExecution;
 use Akeneo\Component\Batch\Model\JobInstance;
+use Akeneo\Component\StorageUtils\Repository\IdentifiableObjectRepositoryInterface;
 use Doctrine\ODM\MongoDB\Query\Builder;
 use PhpSpec\ObjectBehavior;
-use Pim\Bundle\ImportExportBundle\Entity\Repository\JobInstanceRepository;
 use Pim\Component\Catalog\Exception\InvalidArgumentException;
 use Prophecy\Argument;
 
@@ -18,7 +18,7 @@ class DateTimeFilterSpec extends ObjectBehavior
 {
     function let(
         Builder $queryBuilder,
-        JobInstanceRepository $jobInstanceRepository,
+        IdentifiableObjectRepositoryInterface $jobInstanceRepository,
         JobRepositoryInterface $jobRepository
     ) {
         $this->beConstructedWith(
@@ -134,7 +134,7 @@ class DateTimeFilterSpec extends ObjectBehavior
         JobExecution $jobExecution,
         \DateTime $startTime
     ) {
-        $jobInstanceRepository->findOneBy(['code' => 'csv_product_export'])->willReturn($jobInstance);
+        $jobInstanceRepository->findOneByIdentifier('csv_product_export')->willReturn($jobInstance);
         $jobRepository->getLastJobExecution($jobInstance, 1)->shouldBeCalled()->willReturn($jobExecution);
 
         $jobExecution->getStartTime()->willReturn($startTime);
@@ -159,7 +159,7 @@ class DateTimeFilterSpec extends ObjectBehavior
         $jobRepository,
         JobInstance $jobInstance
     ) {
-        $jobInstanceRepository->findOneBy(['code' => 'csv_product_export'])->willReturn($jobInstance);
+        $jobInstanceRepository->findOneByIdentifier('csv_product_export')->willReturn($jobInstance);
         $jobRepository->getLastJobExecution($jobInstance, 1)->shouldBeCalled()->willReturn(null);
 
         $queryBuilder->field(Argument::any())->shouldNotBeCalled();
@@ -194,8 +194,7 @@ class DateTimeFilterSpec extends ObjectBehavior
             InvalidArgumentException::expected(
                 'updated',
                 'array with 2 elements, string or \DateTime',
-                'filter',
-                'date',
+                'Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\Filter\DateTimeFilter',
                 print_r(123, true)
             )
         )->during('addFieldFilter', ['updated', '>', 123]);
@@ -205,7 +204,11 @@ class DateTimeFilterSpec extends ObjectBehavior
     {
         $this
             ->shouldThrow(
-                InvalidArgumentException::stringExpected('updated', 'filter', 'updated', 'integer')
+                InvalidArgumentException::stringExpected(
+                    'updated',
+                    'Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\Filter\DateTimeFilter',
+                    'integer'
+                )
             )->during(
                 'addFieldFilter',
                 [
@@ -222,7 +225,7 @@ class DateTimeFilterSpec extends ObjectBehavior
     {
         $this
             ->shouldThrow(
-                InvalidArgumentException::numericExpected('updated', 'filter', 'updated', 'string')
+                InvalidArgumentException::numericExpected('updated', 'Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\Filter\DateTimeFilter', 'string')
             )->during(
                 'addFieldFilter',
                 [
@@ -241,8 +244,7 @@ class DateTimeFilterSpec extends ObjectBehavior
             InvalidArgumentException::expected(
                 'updated',
                 'a string with the format yyyy-mm-dd H:i:s',
-                'filter',
-                'date',
+                'Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\Filter\DateTimeFilter',
                 'not a valid date format'
             )
         )->during('addFieldFilter', ['updated', '>', ['not a valid date format', 'WRONG']]);
@@ -254,8 +256,7 @@ class DateTimeFilterSpec extends ObjectBehavior
             InvalidArgumentException::expected(
                 'updated',
                 'array with 2 elements, string or \DateTime',
-                'filter',
-                'date',
+                'Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\Filter\DateTimeFilter',
                 123
             )
         )->during('addFieldFilter', ['updated', '>', [123, 123]]);
@@ -267,8 +268,7 @@ class DateTimeFilterSpec extends ObjectBehavior
             InvalidArgumentException::expected(
                 'updated',
                 'array with 2 elements, string or \DateTime',
-                'filter',
-                'date',
+                'Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\Filter\DateTimeFilter',
                 print_r([123, 123, 'three'], true)
             )
         )->during('addFieldFilter', ['updated', '>', [123, 123, 'three']]);

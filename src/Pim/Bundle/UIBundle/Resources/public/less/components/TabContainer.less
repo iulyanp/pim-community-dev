@@ -1,0 +1,42 @@
+@import '../base/variables';
+
+.AknTabContainer {
+  padding: 10px 20px;
+
+  &-content {
+    border-left: 1px solid @AknBorderColor;
+    border-right: 1px solid @AknBorderColor;
+    border-bottom: 1px solid @AknBorderColor;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+
+    &--fullWidth {
+      width: 100%;
+    }
+  }
+
+  &-contentThreeColumns {
+    display: flex;
+    align-items: stretch;
+  }
+
+  &-panels {
+    flex-basis: 450px;
+    flex-grow: 0.1;
+
+    &--closed {
+      display: none;
+    }
+  }
+
+  &-notPanels { }
+
+  &-contentThreeColumns--fullPanel &-notPanels {
+    display: none;
+  }
+
+  &-contentThreeColumns--fullPanel &-panels {
+    border-left: 1px solid @AknBorderColor;
+    flex-basis: 100%;
+  }
+}

@@ -143,6 +143,8 @@ services:
             - '@pim_catalog.repository.category'
             - '@pim_catalog.repository.locale'
             - '@pim_catalog.repository.currency'
+            - '@pim_catalog.repository.attribute'
+            - '@akeneo_measure.manager'
 
     pim_catalog.updater.locale:
         class: '%pim_catalog.updater.locale.class%'
@@ -161,8 +163,6 @@ services:
 
     pim_catalog.updater.association_type:
         class: '%pim_catalog.updater.association_type.class%'
-        arguments:
-            - '@pim_catalog.repository.association_type'
 
     pim_catalog.updater.variant_group:
         class: '%pim_catalog.updater.variant_group.class%'

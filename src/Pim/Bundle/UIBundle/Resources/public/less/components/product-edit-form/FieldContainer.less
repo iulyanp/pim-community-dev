@@ -1,0 +1,53 @@
+@import '../../base/variables';
+
+.AknFieldContainer {
+  margin-bottom: 20px;
+
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  &-label {
+    color: @AknDarkBlue;
+    flex-grow: 1;
+    font-size: @AknFontSizeBig;
+  }
+
+  &-unavailable {
+    color: @AknLightFontColor;
+  }
+
+  &-footer {
+    color: @AknLightFontColor;
+    font-size: @AknFontSizeSmall;
+  }
+
+  &-inputContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &-iconsContainer {
+    margin-left: 5px;
+  }
+
+  &-validationErrors {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &-validationError {
+    display: flex;
+    align-items: baseline;
+    margin-top: 3px;
+    color: @AknRed;
+  }
+
+  &--withoutMargin {
+    margin-bottom: 0;
+  }
+}

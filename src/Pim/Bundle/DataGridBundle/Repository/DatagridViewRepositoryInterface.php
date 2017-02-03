@@ -24,14 +24,16 @@ interface DatagridViewRepositoryInterface
     public function getDatagridViewTypeByUser(UserInterface $user);
 
     /**
-     * Get all datagrid views by user and type
+     * Get all datagrid views by type
      *
      * @param UserInterface $user
      * @param string        $alias
      *
+     * @return ArrayCollection
+     *
      * @deprecated Please use DatagridViewRepositoryInterface::findDatagridViewBySearch instead
      */
-    public function findDatagridViewByUserAndAlias(UserInterface $user, $alias);
+    public function findDatagridViewByAlias($alias);
 
     /**
      * Search datagrid views for the given $user and grid $alias.

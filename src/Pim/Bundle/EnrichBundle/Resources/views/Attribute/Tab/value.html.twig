@@ -4,13 +4,13 @@
         {% import 'PimUIBundle:Default:page_elements.html.twig' as elements %}
     {% endif %}
     {% endspaceless %}
-    {% set accordionContent = { 'pane.accordion.label_translations': form_row(form.label) } %}
+    {% set accordionContent = { 'pane.accordion.label_translations': elements.form_container(form_row(form.label)) } %}
     {% if form['autoOptionSorting'] is defined %}
         {% set optionsContent %}
             {% if form.vars.value.id is not null %}
                 {% set sortable = form['autoOptionSorting'] is defined ? (not form['autoOptionSorting'].vars.data ? '1' : '0') : '1' %}
-                <div id="attribute-option-grid" data-attribute-id="{{ form.vars.value.id }}" data-locales="{{ locales|json_encode() }}" data-sortable="{{ sortable }}"></div>
-
+                <div class="AknFormContainer AknFormContainer--withPadding" id="attribute-option-switcher"></div>
+                <div id="attribute-option-grid" class="AknGridContainer" data-attribute-id="{{ form.vars.value.id }}" data-locales="{{ locales|json_encode() }}" data-sortable="{{ sortable }}"></div>
                 <script type="text/javascript">
                     require(['jquery', 'pim/attributeoptionview'], function($, attributeoptiongrid) {
                         attributeoptiongrid($('#attribute-option-grid'));
@@ -23,5 +23,5 @@
         {% set accordionContent = accordionContent|merge({ 'pane.accordion.options': optionsContent }) %}
     {% endif %}
 
-    {{ elements.tabSections(accordionContent, 2) }}
+    {{ elements.tabSections(accordionContent) }}
 </div>

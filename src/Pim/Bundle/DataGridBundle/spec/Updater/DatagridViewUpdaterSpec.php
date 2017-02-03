@@ -2,14 +2,21 @@
 
 namespace spec\Pim\Bundle\DataGridBundle\Updater;
 
+use Akeneo\Component\StorageUtils\Exception\InvalidObjectException;
+use Akeneo\Component\StorageUtils\Repository\IdentifiableObjectRepositoryInterface;
 use Akeneo\Component\StorageUtils\Updater\ObjectUpdaterInterface;
 use Pim\Bundle\DataGridBundle\Entity\DatagridView;
 use Pim\Bundle\DataGridBundle\Updater\DatagridViewUpdater;
 use PhpSpec\ObjectBehavior;
-use Pim\Bundle\UserBundle\Entity\User;
+use Pim\Bundle\UserBundle\Entity\UserInterface;
 
 class DatagridViewUpdaterSpec extends ObjectBehavior
 {
+    function let(IdentifiableObjectRepositoryInterface $userRepository)
+    {
+        $this->beConstructedWith($userRepository);
+    }
+
     function it_is_initializable()
     {
         $this->shouldHaveType(DatagridViewUpdater::class);
@@ -20,13 +27,20 @@ class DatagridViewUpdaterSpec extends ObjectBehavior
         $this->shouldImplement(ObjectUpdaterInterface::class);
     }
 
-    function it_throws_an_exception_if_the_given_object_is_not_a_datagrid(User $user)
+    function it_throws_an_exception_if_the_given_object_is_not_a_datagrid()
     {
-        $this->shouldThrow('\InvalidArgumentException')->during('update', [$user, []]);
+        $this->shouldThrow(
+            InvalidObjectException::objectExpected(
+                'stdClass',
+                DatagridView::class
+            )
+        )->during('update', [new \stdClass(), []]);
     }
 
-    function it_updates_the_data_grid_property(DatagridView $datagridView, User $user)
+    function it_updates_the_data_grid_property($userRepository, DatagridView $datagridView, UserInterface $user)
     {
+        $userRepository->findOneByIdentifier('julia')->willreturn($user);
+
         $datagridView->setLabel('My view')->shouldBeCalled();
         $datagridView->setOwner($user)->shouldBeCalled();
         $datagridView->setType(DatagridView::TYPE_PUBLIC)->shouldBeCalled();
@@ -35,7 +49,7 @@ class DatagridViewUpdaterSpec extends ObjectBehavior
         $datagridView->setFilters('my filter as string')->shouldBeCalled();
 
         $this->update($datagridView, [
-            'owner' => $user,
+            'owner' => 'julia',
             'type' => DatagridView::TYPE_PUBLIC,
             'datagrid_alias' => 'product-grid',
             'label' => 'My view',

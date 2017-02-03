@@ -93,9 +93,11 @@
 {% endblock form_end %}
 
 {% block form_row_field %}
-    <div class="control-group{% if attr.class is defined %} {{ attr.class }}{% endif %}">
-        {{ form_label(form, '', { label_attr: label_attr|merge({ class: 'control-label' })}) }}
-        <div class="controls{% if errors|length > 0 %} validation-error{% endif %}">
+    <div class="AknFieldContainer{% if attr.class is defined %} {{ attr.class }}{% endif %}">
+        <div class="AknFieldContainer-header">
+            {{ form_label(form, '', { label_attr: label_attr|merge({ class: 'AknFieldContainer-label control-label' })}) }}
+        </div>
+        <div class="AknFieldContainer-inputContainer field-input{% if errors|length > 0 %} validation-error{% endif %}">
             {{ form_widget(form) }}
             {% if form.children|length == 0 %}
                 {{ block('form_info') }}
@@ -113,11 +115,12 @@
 {% block form_label %}
 {% spaceless %}
     {% if label is not sameas(false) %}
+        {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' AknFieldContainer-label')|trim}) %}
         {% if not compound %}
             {% set label_attr = label_attr|merge({'for': id}) %}
         {% endif %}
         {% if required %}
-            {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+            {% set label_attr = label_attr|merge({'class': (label_attr.class ~ ' required')|trim}) %}
         {% endif %}
         {% if label is empty %}
             {% set label = name|humanize %}
@@ -142,12 +145,12 @@
 {% block form_info %}
     {% spaceless %}
         {% if type is not defined or type != 'hidden' %}
-            <div class="icons-container">
+            <div class="AknFieldContainer-iconsContainer icons-container">
                 {% if help is defined %}
-                    <i class="icon-info-sign" data-toggle="tooltip" data-placement="right" data-original-title="{{ help|trans }}"></i>
+                    <i class="AknIconButton icon-info-sign" data-toggle="tooltip" data-placement="right" data-original-title="{{ help|trans }}"></i>
                 {% endif %}
                 {% if from_variant is defined %}
-                    <i class="icon-lock" data-trigger="hover" data-toggle="popover" data-placement="right" data-title="{{ 'pim_enrich.product_value.tooltip.from_variant.title'|trans }}" data-content="{{ 'pim_enrich.product_value.tooltip.from_variant.content'|trans }} : {{ from_variant.code }}" data-container="body"></i>
+                    <i class="AknIconButton icon-lock" data-trigger="hover" data-toggle="popover" data-placement="right" data-title="{{ 'pim_enrich.product_value.tooltip.from_variant.title'|trans }}" data-content="{{ 'pim_enrich.product_value.tooltip.from_variant.content'|trans }} : {{ from_variant.code }}" data-container="body"></i>
                 {% endif %}
                 {{ form_errors(form) }}
             </div>
@@ -181,7 +184,7 @@
                     : error.messageTemplate|transchoice(error.messagePluralization, error.messageParameters, 'validators') %}
                 {% set combinedError = (combinedError != '') ? combinedError ~ '; ' ~ error : error %}
             {% endfor %}
-            <i class="validation-tooltip" data-placement="right" data-toggle="tooltip" data-original-title="{{ combinedError|trans }}"></i>
+            <i class="AknIconButton AknIconButton--important icon-warning-sign validation-tooltip" data-placement="right" data-toggle="tooltip" data-original-title="{{ combinedError|trans }}"></i>
         {% else %}
             {{ parent() }}
         {% endif %}
@@ -191,11 +194,18 @@
 {% block pim_translatable_field_row %}
     {{ form_errors(form) }}
     {% for translation in form %}
-    <div class="control-group">
-        {{ form_label(translation) }}
-        <div class="controls">
-            {{ form_errors(translation) }}
+    <div class="AknFieldContainer">
+        <div class="AknFieldContainer-header">
+            {{ form_label(translation) }}
+        </div>
+        <div class="AknFieldContainer-inputContainer field-input{% if errors|length > 0 %} validation-error{% endif %}">
             {{ form_widget(translation) }}
+            {% if form.children|length == 0 %}
+                {{ block('form_info') }}
+            {% endif %}
+        </div>
+        <div class="AknFieldContainer-footer">
+            {{ form_errors(translation) }}
         </div>
     </div>
     {% endfor %}
@@ -203,34 +213,35 @@
 
 {% block pim_enrich_media_row %}
     {% spaceless %}
-
     {% set empty = not form.vars.value or not form.vars.value.key %}
     {% if not (empty and form.parent.vars.mode is defined and 'comparison' == form.parent.vars.mode) %}
-        <div class="control-group upload-zone-container">
-            {{ form_label(form, null, { 'label_attr': {'class': 'control-label', 'for': form.uploadedFile.vars.id} }) }}
-            <div class="controls">
+        <div class="AknFormContainer AknFormContainer--withPadding AknFormContainer--centered control-group upload-zone-container">
+            <div class="controls AknMediaField">
                 <label class="upload-zone file{% if empty %} empty{% endif %}{% if disabled %} disabled{% endif %}">
                     {% if form.parent.vars.mode is not defined or 'comparison' != form.parent.vars.mode %}
-                        <a class="btn no-hash remove-upload{% if empty %} hide{% endif %}{% if disabled %} disabled{% endif %}">
+                        <a class="AknMediaField-trashIcon no-hash remove-upload{% if empty %} hide{% endif %}{% if disabled %} disabled{% endif %}">
                             <i class="icon-trash"></i>
                         </a>
                     {% endif %}
                     <div class="upload-info">
                         {% if not empty %}
                             <a class="no-hash upload-preview" href="{{ path('pim_enrich_media_show', { 'filename': form.vars.value.key|url_encode }) }}" target="_blank" title="{{ form.vars.value.originalFilename }}">
-                                <img src="/bundles/pimui/images/upload.png" alt="upload icon" class="upload-preview">
+                                <img src="/bundles/pimui/images/upload.png" alt="upload icon" class="AknMediaField-uploadIcon upload-preview">
                             </a>
                             {% set filename = form.vars.value.originalFilename %}
                             {% if filename|length > 20 %}
                                 {% set filename = filename|slice(0, 17) ~ '...' %}
                             {% endif %}
+                            <span class="upload-filename" data-empty-title="{{ 'Drag and drop a file or click here'|trans }}">{% if empty %}{{ 'Drag and drop a file or click here'|trans }}{% else %}{{ filename }}{% endif %}</span>
                         {% else %}
-                            <img src="/bundles/pimui/images/upload.png" alt="upload icon" class="upload-preview">
+                            <div class="AknMediaField-emptyContainer">
+                                <img src="/bundles/pimui/images/upload.png" alt="upload icon" class="AknMediaField-uploadIcon upload-preview">
+                                <span class="upload-filename" data-empty-title="{{ 'Drag and drop a file or click here'|trans }}">{% if empty %}{{ 'Drag and drop a file or click here'|trans }}{% else %}{{ filename }}{% endif %}</span>
+                            </div>
                         {% endif %}
-                        <span class="upload-filename" data-empty-title="{{ 'Drag and drop a file or click here'|trans }}">{% if empty %}{{ 'Drag and drop a file or click here'|trans }}{% else %}{{ filename }}{% endif %}</span>
                     </div>
                     {% if empty %}
-                        {{ form_widget(form.uploadedFile) }}
+                        {{ form_widget(form.uploadedFile, { attr: { 'class': 'AknTextField--fileDropZone' }}) }}
                     {% else %}
                         {{ form_widget(form.uploadedFile, { attr: { 'class': 'hide', 'disabled': 'disabled' }}) }}
                         {{ form_widget(form.removed, {'attr': { 'class': 'hide' }}) }}
@@ -266,18 +277,6 @@
 {% endblock %}
 
 {% block widget_attributes %}
-{% if attr.size is not defined %}
-    {% if attr.class is defined %}
-        {% if 'input-' not in attr.class %}
-            {% set class = attr.class ~ ' input-large' %}
-        {% else %}
-            {% set class = attr.class %}
-        {% endif %}
-    {% else %}
-        {% set class = 'input-large' %}
-    {% endif %}
-    {% set attr = attr|merge({'class': class }) %}
-{% endif %}
 {% spaceless %}
     id="{{ id }}" name="{{ full_name }}"{% if read_only %} readonly="readonly"{% endif %}{% if disabled %} disabled="disabled"{% endif %}{% if required %} required="required"{% endif %}{% if max_length %} maxlength="{{ max_length }}"{% endif %}{% if pattern %} pattern="{{ pattern }}"{% endif %}
     {% for attrname, attrvalue in attr %}{% if attrname in ['placeholder', 'title'] %}{{ attrname }}="{{ attrvalue|trans({}, translation_domain) }}" {% else %}{{ attrname }}="{{ attrvalue }}" {% endif %}{% endfor %}
@@ -313,13 +312,21 @@
 {% block pim_enrich_attribute_requirement_widget %}
     {% set requiredTitle = 'Required'|trans %}
     {% set nonRequiredTitle = 'Not required'|trans %}
-    <div class="attribute-requirement" data-required-title="{{ requiredTitle }}" data-not-required-title="{{ nonRequiredTitle }}">
+    <div class="AknAcl AknAcl--centered attribute-requirement" data-required-title="{{ requiredTitle }}" data-not-required-title="{{ nonRequiredTitle }}">
         {% if form.required.vars.keep_non_required %}
             <input type="hidden" id="{{ form.required.vars.id }}" name="{{ form.required.vars.full_name }}" class="hide" value="{{ form.required.vars.value ? '1': '0' }}" />
-            <i class="icon-{{ form.required.vars.value ? 'ok ' : 'circle non-' }}required" data-toggle="tooltip" data-placement="right" data-original-title="{{ form.required.vars.value ? requiredTitle : nonRequiredTitle }}"></i>
+            {% set iconClass = 'AknAcl-icon AknAcl-icon--granted icon-ok required' %}
+            {% if not form.required.vars.value %}
+                {% set iconClass = 'AknAcl-icon icon-circle non-required' %}
+            {% endif %}
+            <i class="{{ iconClass }}" data-toggle="tooltip" data-placement="right" data-original-title="{{ form.required.vars.value ? requiredTitle : nonRequiredTitle }}"></i>
         {% else %}
             <input type="checkbox" id="{{ form.required.vars.id }}" name="{{ form.required.vars.full_name }}" class="hide" {% if form.required.vars.checked %}checked="checked"{% endif %} />
-            <i class="icon-{{ form.required.vars.checked ? 'ok ' : 'circle non-' }}required" data-toggle="tooltip" data-placement="right" data-original-title="{{ form.required.vars.checked ? requiredTitle : nonRequiredTitle }}"></i>
+            {% set iconClass = 'AknAcl-icon AknAcl-icon--granted icon-ok required' %}
+            {% if not form.required.vars.checked %}
+                {% set iconClass = 'AknAcl-icon icon-circle non-required' %}
+            {% endif %}
+            <i class="{{ iconClass }}" data-toggle="tooltip" data-placement="right" data-original-title="{{ form.required.vars.checked ? requiredTitle : nonRequiredTitle }}"></i>
         {% endif %}
     </div>
 {% endblock pim_enrich_attribute_requirement_widget %}
@@ -352,9 +359,9 @@
                 {{ form_widget(form.identity.id) }}
                 {{ form_widget(form.permissions) }}
             {% else %}
-                <div class="acl-permission{{ form.vars.value.identity.name == '(default)' ? ' default-field hide' : '' }}">
-                    {{ form_widget(form.identity) }}
+                <div class="AknAcl acl-permission{{ form.vars.value.identity.name == '(default)' ? ' default-field AknAcl--hide hide' : '' }}">
                     {{ form_widget(form.permissions) }}
+                    {{ form_widget(form.identity) }}
                 </div>
             {% endif %}
         {% else %}
@@ -382,7 +389,7 @@
                     {% set additionalClass = additionalClass ~ ' default-field-toggle' %}
                 {% endif %}
                 <div class="acl-permission{{ additionalClass }}" data-permission="{{ field }}">
-                    <strong>{{ ('oro_security.acl.' ~ form.parent.vars.value.identity.name ~ '.' ~ field)|lower|trans }}</strong>
+                    <span>{{ ('oro_security.acl.' ~ form.parent.vars.value.identity.name ~ '.' ~ field)|lower|trans }}</span>
                     {{ form_widget(permission) }}
                 </div>
             {% endfor %}
@@ -397,13 +404,17 @@
 {% endblock %}
 
 {% block pim_acl_access_level_selector_widget %}
-    <a class="icon-{{ form.vars.checked ? 'ok ' : 'remove non-' }}granted acl-permission-toggle"></a>
+    {% set iconClass = 'icon-ok AknAcl-icon--granted granted' %}
+    {% if not form.vars.checked %}
+        {% set iconClass = 'icon-remove AknAcl-icon--nonGranted non-granted' %}
+    {% endif %}
+    <a class="AknAcl-icon {{ iconClass }} acl-permission-toggle"></a>
     {% set attr = attr|merge({ class: 'hide' }) %}
     {{ block('checkbox_widget') }}
 {% endblock %}
 
 {% block oro_acl_label_widget %}
-    <strong>{{ value|trans }}</strong>
+    <span>{{ value|trans }}</span>
 {% endblock %}
 
 {% block pim_async_select_widget %}
@@ -416,3 +427,25 @@
 {% block select_family_type_row %}
     {{ block('form_row_field') }}
 {% endblock %}
+
+{%- block form_widget_simple -%}
+    {%- set type = type|default('text') -%}
+    {% if attr.class is defined %}
+        {% if 'input-' not in attr.class %}
+            {% set class = attr.class ~ ' AknTextField' %}
+        {% else %}
+            {% set class = attr.class %}
+        {% endif %}
+    {% else %}
+        {% set class = ' AknTextField' %}
+    {% endif %}
+    {% if 'file' == type %}
+        {% set class = class ~ ' AknTextField--file' %}
+    {% endif %}
+    {% set attr = attr|merge({'class': class }) %}
+    <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+{%- endblock form_widget_simple -%}
+
+{%- block textarea_widget -%}
+    <textarea class="AknTextareaField" {{ block('widget_attributes') }}>{{ value }}</textarea>
+{%- endblock textarea_widget -%}

@@ -21,10 +21,10 @@ define(
         template
     ) {
         return BaseForm.extend({
-            className: 'btn-group status-switcher btn-dropdown',
+            className: 'AknDropdownButton AknDropdown status-switcher',
             template: _.template(template),
             events: {
-                'click li a': 'updateStatus'
+                'click .AknDropdown-menuLink': 'updateStatus'
             },
 
             /**
@@ -45,8 +45,12 @@ define(
                 this.$el.html(this.template({
                     status: status
                 }));
-                this.$el.addClass(status ? 'enabled' : 'disabled');
-                this.$el.removeClass(status ? 'disabled' : 'enabled');
+                this.$el
+                    .addClass(status ? 'AknDropdownButton--apply' : 'AknDropdownButton--important')
+                    .removeClass(status ? 'AknDropdownButton--important' : 'AknDropdownButton--apply')
+                    .find('.AknCaret')
+                    .addClass(status ? 'AknCaret--apply' : 'AknCaret--important')
+                    .removeClass(status ? 'AknCaret--important' : 'AknCaret--apply');
                 this.delegateEvents();
 
                 return this;

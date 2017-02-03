@@ -46,15 +46,15 @@ interface GroupRepositoryInterface extends IdentifiableObjectRepositoryInterface
     /**
      * @return mixed
      */
-    public function createDatagridQueryBuilder();
-
-    /**
-     * @return mixed
-     */
     public function createAssociationDatagridQueryBuilder();
 
     /**
-     * {@inheritdoc}
+     * @param string $dataLocale
+     * @param int    $collectionId
+     * @param string $search
+     * @param array  $options
+     *
+     * @return array
      */
     public function getOptions($dataLocale, $collectionId = null, $search = '', array $options = []);
 
