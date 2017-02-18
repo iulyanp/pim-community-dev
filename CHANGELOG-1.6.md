@@ -1,4 +1,16 @@
-# 1.6.8 (2017-01-05)
+# 1.6.11 (2017-02-14)
+
+## Improvements
+
+- PIM-6149: Remove version number displayed on login page
+- PIM-6157: Improve product exports speed
+- PIM-6159: Fix number comparator when removing numeric value in the PEF
+
+## Bug fixes
+
+- PIM-6152: Fix fatal error on import in case of wrong column count
+
+# 1.6.10 (2017-02-02)
 
 ## Bug fixes
 
@@ -6,6 +18,8 @@
 - PIM-6062: Fix potential Unix commands injection
 - PIM-5085: Fix update of the normalized data on family update (mongodb)
 - PIM-6080: Fix simple and multi select removal on product export builder
+- PIM-6124: Importing family with missing requirement column does not remove associated requirements anymore
+- PIM-6140: Fix 'equals to' filters on job tracker page
 
 # 1.6.9 (2017-01-17)
 

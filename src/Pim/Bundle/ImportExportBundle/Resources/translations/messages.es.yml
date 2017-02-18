@@ -6,14 +6,14 @@ pim_import_export:
   status:
     - Listo
   batch_status:
-    1: COMPLETADO
-    2: INICIANDO
-    3: INICIADO
-    4: PARAR
-    5: DETENIDO
-    6: FALLO
-    7: ABANDONADO
-    8: DESCONOCIDO
+    1: Finalizado
+    2: Iniciando
+    3: Iniciado
+    4: Suspendiendo
+    5: Suspendido
+    6: Fallido
+    7: Abandonado
+    8: Desconocido
   download_archive:
     archive: descargar fichero generado|descargar ficheros generados
     output: descargar ficher generado |descargar ficheros generados
@@ -152,16 +152,17 @@ job_execution.summary:
     skipped: omitido, extensión en lista blanca
 Step: Paso
 Status: Estado
+Warnings: Advertencias
 Summary: Resumen
 Start: Iniciar
 End: Finalizar
 set_attribute_requirements: Configurar requerimientos del atributo
-COMPLETED: COMPLETADO
-STARTING: INICIANDO
-STARTED: INICIADO
-STOPPING: PARAR
-STOPPED: DETENIDO
-FAILED: FALLO
-ABANDONED: ABANDONADO
-UNKNOWN: DESCONOCIDO
+COMPLETED: Finalizado
+STARTING: Iniciando
+STARTED: Iniciado
+STOPPING: Suspendiendo
+STOPPED: Suspendido
+FAILED: Fallido
+ABANDONED: Abandonado
+UNKNOWN: Desconocido
 warning.label: '¡Advertencia!'
