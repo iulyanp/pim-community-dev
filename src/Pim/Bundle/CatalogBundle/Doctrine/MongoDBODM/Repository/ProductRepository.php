@@ -11,7 +11,6 @@ use Pim\Bundle\CatalogBundle\Doctrine\MongoDBODM\ProductRepositoryInterface as M
 use Pim\Component\Catalog\AttributeTypes;
 use Pim\Component\Catalog\Model\AssociationTypeInterface;
 use Pim\Component\Catalog\Model\AttributeInterface;
-use Pim\Component\Catalog\Model\AttributeOptionInterface;
 use Pim\Component\Catalog\Model\CategoryInterface;
 use Pim\Component\Catalog\Model\ChannelInterface;
 use Pim\Component\Catalog\Model\FamilyInterface;
@@ -674,7 +673,7 @@ class ProductRepository extends DocumentRepository implements
      */
     protected function getIdentifierAttribute()
     {
-        return $this->attributeRepository->findOneBy(['attributeType' => AttributeTypes::IDENTIFIER]);
+        return $this->attributeRepository->findOneBy(['type' => AttributeTypes::IDENTIFIER]);
     }
 
     /**

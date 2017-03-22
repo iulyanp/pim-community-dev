@@ -3,6 +3,7 @@
 namespace spec\Pim\Component\Catalog\Updater\Setter;
 
 use Akeneo\Component\StorageUtils\Exception\InvalidPropertyException;
+use Akeneo\Component\StorageUtils\Exception\InvalidPropertyTypeException;
 use PhpSpec\ObjectBehavior;
 use Pim\Component\Catalog\Builder\ProductBuilderInterface;
 use Pim\Component\Catalog\Model\AttributeInterface;
@@ -29,13 +30,13 @@ class TextAttributeSetterSpec extends ObjectBehavior
         AttributeInterface $textareaAttribute,
         AttributeInterface $numberAttribute
     ) {
-        $textAttribute->getAttributeType()->willReturn('pim_catalog_text');
+        $textAttribute->getType()->willReturn('pim_catalog_text');
         $this->supportsAttribute($textAttribute)->shouldReturn(true);
 
-        $textareaAttribute->getAttributeType()->willReturn('pim_catalog_textarea');
+        $textareaAttribute->getType()->willReturn('pim_catalog_textarea');
         $this->supportsAttribute($textareaAttribute)->shouldReturn(true);
 
-        $numberAttribute->getAttributeType()->willReturn('pim_catalog_number');
+        $numberAttribute->getType()->willReturn('pim_catalog_number');
         $this->supportsAttribute($numberAttribute)->shouldReturn(false);
     }
 
@@ -87,7 +88,6 @@ class TextAttributeSetterSpec extends ObjectBehavior
         AttributeInterface $attribute,
         ProductInterface $product1,
         ProductInterface $product2,
-        ProductInterface $product3,
         $builder,
         ProductValue $productValue
     ) {
@@ -219,5 +219,19 @@ class TextAttributeSetterSpec extends ObjectBehavior
                 $e
             )
         )->during('setAttributeData', [$product, $attribute, '', ['locale' => null, 'scope' => 'ecommerce']]);
+    }
+
+    function it_throws_an_exception_when_data_is_not_a_string(
+        AttributeInterface $attribute,
+        ProductInterface $product
+    ) {
+        $attribute->getCode()->willReturn('attributeCode');
+        $this->shouldThrow(
+            InvalidPropertyTypeException::stringExpected(
+                'attributeCode',
+                'Pim\Component\Catalog\Updater\Setter\TextAttributeSetter',
+                []
+            )
+        )->during('setAttributeData', [$product, $attribute, [], ['locale' => null, 'scope' => 'ecommerce']]);
     }
 }

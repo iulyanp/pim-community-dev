@@ -44,8 +44,9 @@ class Form extends Base
                 'Save'                            => ['css' => '.AknButton--apply'],
                 'Panel sidebar'                   => [
                     'css'        => '.edit-form > .content',
-                    'decorators' => ['Pim\Behat\Decorator\Page\PanelableDecorator']
-                ]
+                    'decorators' => ['Pim\Behat\Decorator\Page\PanelableDecorator'],
+                ],
+                'Tooltips'                         => ['css' => '.icon-info-sign'],
             ],
             $this->elements
         );
@@ -160,12 +161,26 @@ class Form extends Base
     public function visitGroup($group)
     {
         $this->spin(function () use ($group) {
-            $group = $this->find('css', sprintf($this->elements['Group']['css'], $group));
-            if (null !== $group && $group->isVisible()) {
+            $group = $this->findGroup($group);
+            if ($group->isVisible()) {
                 $group->click();
 
                 return true;
             }
+        }, sprintf('Cannot click the group "%s".', $group));
+    }
+
+    /**
+     * Get the specified group
+     *
+     * @param string $group
+     */
+    public function findGroup($group)
+    {
+        return $this->spin(function () use ($group) {
+            $group = $this->find('css', sprintf($this->elements['Group']['css'], $group));
+
+            return $group;
         }, sprintf('Cannot find the group "%s".', $group));
     }
 
@@ -243,6 +258,23 @@ class Form extends Base
         }
 
         return $errors;
+    }
+
+    /**
+     * Get tooltips messages
+     *
+     * @return string[]
+     */
+    public function getTooltipMessages()
+    {
+        $tooltips = $this->findAll('css', $this->elements['Tooltips']['css']);
+
+        $messages = [];
+        foreach ($tooltips as $tooltip) {
+            $messages[] = $tooltip->getAttribute('data-original-title');
+        }
+
+        return $messages;
     }
 
     /**
@@ -688,32 +720,23 @@ class Form extends Base
      *
      * @param NodeElement $label
      * @param string      $value
-     *
-     * @throws \InvalidArgumentException
      */
     protected function fillSelect2Field(NodeElement $label, $value)
     {
-        if (trim($value)) {
-            $container = $this->getClosest($label, 'AknFieldContainer');
-            $link = $container->find('css', '.select2-choice');
+        $container = $this->getClosest($label, 'AknFieldContainer');
 
-            if (null !== $link) {
-                $link->click();
-                $this->getSession()->wait($this->getTimeout(), '!$.active');
+        $select2Container = $this->spin(function () use ($container) {
+            return $container->find('css', '.select2-container');
+        }, 'Can not find the select2 container.');
 
-                $field = $this->spin(function () use ($value) {
-                    return $this->find('css', sprintf('#select2-drop li:contains("%s")', $value));
-                }, sprintf('Cannot find "%s" select2 element', $value));
+        $field = $this->decorate(
+            $select2Container,
+            ['Pim\Behat\Decorator\Field\Select2Decorator']
+        );
 
-                $field->click();
+        $field->setValue($value);
 
-                return;
-            }
-
-            throw new \InvalidArgumentException(
-                sprintf('Could not find select2 widget inside %s', $container->getHtml())
-            );
-        }
+        return;
     }
 
     /**
@@ -776,7 +799,11 @@ class Form extends Base
             return $this->find('css', sprintf('#%s', $for));
         }, sprintf('Cannot find element field with id %s', $for));
 
-        $field->setValue($value);
+        $this->spin(function () use ($field, $value) {
+            $field->setValue($value);
+
+            return $field->getValue() === $value;
+        }, sprintf('Cannot fill field "%s" with value "%s"', $label->getHtml(), $value));
 
         $this->getSession()->executeScript(
             sprintf("$('#%s').trigger('change');", $for)

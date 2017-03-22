@@ -4,6 +4,7 @@ namespace spec\Pim\Component\Catalog\Updater;
 
 use Akeneo\Component\StorageUtils\Exception\InvalidObjectException;
 use Akeneo\Component\StorageUtils\Exception\InvalidPropertyException;
+use Akeneo\Component\StorageUtils\Exception\InvalidPropertyTypeException;
 use PhpSpec\ObjectBehavior;
 use Pim\Component\Catalog\Model\AttributeInterface;
 use Pim\Component\Catalog\Model\AttributeOptionInterface;
@@ -104,33 +105,38 @@ class AttributeOptionUpdaterSpec extends ObjectBehavior
             ]
         );
     }
+    
+    function it_throws_an_exception_when_code_is_not_scalar(AttributeOptionInterface $attributeOption)
+    {
+        $values = [
+            'code' => [],
+        ];
 
-    function it_does_not_update_readonly_fields_on_an_existing_attribute_option(
-        AttributeOptionInterface $attributeOption,
-        AttributeOptionValueInterface $attributeOptionValue
-    ) {
-        $attributeOption->getId()->willReturn(42);
-        $attributeOption->getAttribute()->willReturn(null);
+        $this
+            ->shouldThrow(
+                InvalidPropertyTypeException::scalarExpected(
+                    'code',
+                    'Pim\Component\Catalog\Updater\AttributeOptionUpdater',
+                    []
+                )
+            )
+            ->during('update', [$attributeOption, $values, []]);
+    }
 
-        // read only fields
-        $attributeOption->setCode('mycode')->shouldNotBeCalled();
-        $attributeOption->setAttribute(Argument::any())->shouldNotBeCalled();
+    function it_throws_an_exception_when_labels_is_not_an_array(AttributeOptionInterface $attributeOption)
+    {
+        $values = [
+            'labels' => 'not_an_array',
+        ];
 
-        $attributeOption->setSortOrder(12)->shouldBeCalled();
-        $attributeOption->setLocale('de_DE')->shouldBeCalled();
-        $attributeOption->getTranslation()->willReturn($attributeOptionValue);
-        $attributeOptionValue->setLabel('210 x 1219 mm')->shouldBeCalled();
-
-        $this->update(
-            $attributeOption,
-            [
-                'code' => 'mycode',
-                'attribute' => 'myattribute',
-                'sort_order' => 12,
-                'labels' => [
-                    'de_DE' => '210 x 1219 mm'
-                ]
-            ]
-        );
+        $this
+            ->shouldThrow(
+                InvalidPropertyTypeException::arrayExpected(
+                    'labels',
+                    'Pim\Component\Catalog\Updater\AttributeOptionUpdater',
+                    'not_an_array'
+                )
+            )
+            ->during('update', [$attributeOption, $values, []]);
     }
 }

@@ -80,11 +80,15 @@ class NavigationContext extends BaseNavigationContext
     /**
      * @param string $code
      *
-     * @Then /^I should be redirected to the "([^"]*)" channel page$/
+     * @Then /^I should be redirected to the "([^"]*)" (channel|family) page$/
      */
-    public function shouldBeRedirectedToTheChannel($code)
+    public function shouldBeRedirectedToTheChannel($code, $page)
     {
-        $url = str_replace('{code}', $code, $this->getPage('Channel edit')->getUrl());
+        $url = str_replace(
+            '{code}',
+            $code,
+            $this->getPage(sprintf('%s edit', ucfirst($page)))->getUrl()
+        );
 
         $this->spin(function () use ($url) {
             $actualFullUrl = $this->getSession()->getCurrentUrl();
@@ -149,7 +153,7 @@ class NavigationContext extends BaseNavigationContext
         $page   = 'GroupType';
         $getter = sprintf('get%s', $page);
         $entity = $this->getFixturesContext()->$getter($identifier);
-        $this->openPage(sprintf('%s edit', $page), ['id' => $entity->getId()]);
+        $this->openPage(sprintf('%s edit', $page), ['code' => $entity->getCode()]);
     }
 
     /**
@@ -207,7 +211,7 @@ class NavigationContext extends BaseNavigationContext
      */
     public function iShouldBeOnTheGroupTypePage(GroupTypeInterface $groupType)
     {
-        $expectedAddress = $this->getPage('GroupType edit')->getUrl(['id' => $groupType->getId()]);
+        $expectedAddress = $this->getPage('GroupType edit')->getUrl(['code' => $groupType->getCode()]);
         $this->assertAddress($expectedAddress);
     }
 
@@ -228,17 +232,6 @@ class NavigationContext extends BaseNavigationContext
     public function iShouldBeOnTheUserGroupsEditPage()
     {
         $this->assertAddress($this->getPage('UserGroup edit')->getUrl());
-    }
-
-    /**
-     * @param Family $family
-     *
-     * @Given /^I should be on the ("([^"]*)" family) page$/
-     */
-    public function iShouldBeOnTheFamilyPage(Family $family)
-    {
-        $expectedAddress = $this->getPage('Family edit')->getUrl(['id' => $family->getId()]);
-        $this->assertAddress($expectedAddress);
     }
 
     /**

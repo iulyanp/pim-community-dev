@@ -200,10 +200,18 @@ pim_enrich:
       btn:
         save: Zapisz
     channel:
+      title: kanał
       info:
         field_not_ready:
           The channel cannot be saved right now. The following fields are not ready:
             - pola
+      meta:
+        created: Utworzono
+        updated: Zaktualizowano
+      btn:
+        save: Zapisz
+    family:
+      title: rodzina
       meta:
         created: Utworzono
         updated: Zaktualizowano
@@ -331,6 +339,24 @@ pim_enrich:
           label_conversion_units: Wybierz jednostkę konwersji dla każdej metryki używanej podczas eksportu produktów
           conversion_unit:
             do_not_convert: Nie konwertuj
+    family:
+      tab:
+        properties:
+          title: Właściwości
+          general: Ogólne
+          code: Kod
+          attribute_as_label: Atrybut używany jako etykieta
+          label_translations: Tłumaczenia etykiety
+        attributes:
+          title: Atrybuty
+          label_label: Etykieta
+          toolbox:
+            select_attributes: Dodaj atrybuty
+            add: Dodaj
+          not_required_label: Nie wymagany
+          required_label: Wymagany
+        history:
+          title: Historia
     attribute_option:
       flash:
         option_created: Ustawienie atrybutu zostało pomyślnie utworzone

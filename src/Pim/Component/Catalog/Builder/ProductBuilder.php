@@ -6,7 +6,6 @@ use Pim\Component\Catalog\AttributeTypes;
 use Pim\Component\Catalog\Factory\ProductValueFactory;
 use Pim\Component\Catalog\Manager\AttributeValuesResolver;
 use Pim\Component\Catalog\Model\AttributeInterface;
-use Pim\Component\Catalog\Model\FamilyInterface;
 use Pim\Component\Catalog\Model\ProductInterface;
 use Pim\Component\Catalog\Model\ProductPriceInterface;
 use Pim\Component\Catalog\Model\ProductValueInterface;
@@ -246,7 +245,7 @@ class ProductBuilder implements ProductBuilderInterface
      */
     public function addMissingPrices(ProductValueInterface $value)
     {
-        if (AttributeTypes::PRICE_COLLECTION === $value->getAttribute()->getAttributeType()) {
+        if (AttributeTypes::PRICE_COLLECTION === $value->getAttribute()->getType()) {
             $activeCurrencyCodes = $this->currencyRepository->getActivatedCurrencyCodes();
             $prices = $value->getPrices();
 
@@ -348,7 +347,7 @@ class ProductBuilder implements ProductBuilderInterface
         foreach ($values as $value) {
             $existingValues[] = [
                 'attribute' => $value->getAttribute()->getCode(),
-                'type'      => $value->getAttribute()->getAttributeType(),
+                'type'      => $value->getAttribute()->getType(),
                 'locale'    => $value->getLocale(),
                 'scope'     => $value->getScope()
             ];
@@ -389,7 +388,7 @@ class ProductBuilder implements ProductBuilderInterface
         }
 
         foreach ($family->getAttributes() as $attribute) {
-            if (AttributeTypes::BOOLEAN === $attribute->getAttributeType()) {
+            if (AttributeTypes::BOOLEAN === $attribute->getType()) {
                 $requiredValues = $this->valuesResolver->resolveEligibleValues([$attribute]);
 
                 foreach ($requiredValues as $value) {
