@@ -269,9 +269,8 @@ pim_enrich:
         label: 选择引用的数据类型
 attribute:
   title: 属性
-  overview: 属性概述
-  create: 创建属性
   edit: 编辑属性
+  create: 创建属性
 attribute group:
   title: 属性组
   overview: 属性组概述
@@ -299,17 +298,13 @@ channel:
   edit: 编辑频道
 currency:
   title: 货币
-  overview: 货币概述
   create: 创建货币
   edit: 编辑货币
 family:
   title: 分类
-  overview: 分类概述
-  create: 创建分类
   edit: 编辑分类
 locale:
   title: 区域
-  overview: 区域概述
   create: 创建区域
   edit: 编辑区域
 product:
@@ -319,18 +314,12 @@ product:
   edit: 编辑产品
 group:
   title: 分组
-  overview: 分组概述
-  create: 创建分组
   edit: 编辑分组
 group type:
   title: 分组类型
-  overview: 分组类型概述
-  create: 创建分组类型
   edit: 编辑分组类型
 variant group:
   title: 属性组
-  overview: 款式组概述
-  create: 创建款式组
   edit: 编辑属性组
 association type:
   title: 关联类型
@@ -733,25 +722,6 @@ Current tab: 当前选项卡
 Group: 分组
 View group: 查看组
 Products: 商品
-pim_menu:
-  tab:
-    collect: 收集
-    enrich: 添加
-    settings: 设置 
-    spread: 传播
-  item:
-    association_type: 关联类型
-    attribute: 属性
-    attribute_group: 属性组
-    category: 分类
-    channel: 渠道
-    currency: 货币
-    family: 品类
-    group: 分组
-    group_type: 分组类型
-    locale: 本地化语言
-    product: 商品
-    variant_group: 款式组
 Properties: 属性
 History: 历史
 pane.accordion:

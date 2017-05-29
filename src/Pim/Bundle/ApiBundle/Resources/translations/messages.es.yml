@@ -7,6 +7,8 @@ pim_api:
     attribute_option:
       edit: Crear y actualizar opciones de atributos
       list: Listar opciones de atributos
+    attribute_group:
+      list: Lista de atributos del grupo
     category:
       edit: Crear y actualizar categorías
       list: Lista de categorías
@@ -15,12 +17,15 @@ pim_api:
       list: Lista de familias
     channel.list: Lista de canales
     locale.list: Lista de locales
+    currency.list: Lista de monedas
   acl_group:
     overall_access: Acceso general API Web
     attribute: Atributos
     attribute_option: Opciones de atributo
+    attribute_group: Grupos de atributos
     category: Categorías
     family: Familias
     channel: Canales
     locale: Locales
+    currency: Monedas
 rights.api: Permisiones del API Web

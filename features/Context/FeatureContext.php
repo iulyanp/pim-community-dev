@@ -227,7 +227,7 @@ class FeatureContext extends MinkContext implements KernelAwareInterface
                 "!$.active",                                   // No ajax request is active
                 "$('#page').css('display') == 'block'",        // Page is displayed (no progress bar)
                 // Page is not loading (no black mask loading page)
-                "($('.loading-mask').length == 0 || $('.loading-mask').css('display') == 'none')",
+                "($('.hash-loading-mask .loading-mask').length == 0 || $('.hash-loading-mask .loading-mask').css('display') == 'none')",
                 "$('.jstree-loading').length == 0",            // Jstree has finished loading
             ];
 
@@ -270,7 +270,11 @@ class FeatureContext extends MinkContext implements KernelAwareInterface
      */
     public function iShouldSeeText(PyStringNode $error)
     {
-        $this->assertSession()->pageTextContains((string) $error);
+        $this->spin(function () use ($error) {
+            $this->assertSession()->pageTextContains((string) $error);
+
+            return true;
+        }, sprintf('Unable to find the text "%s" in the page', $error));
     }
 
     /**

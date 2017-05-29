@@ -269,9 +269,8 @@ pim_enrich:
         label: Valitse viite-datatyyppi
 attribute:
   title: attribuutti
-  overview: attribuuttien katsaus
-  create: luo attribuutti
   edit: muokkaa attribuuttia
+  create: luo attribuutti
 attribute group:
   title: attribuuttiryhmä
   overview: attribuuttiryhmien tarkastelu
@@ -299,17 +298,13 @@ channel:
   edit: muokkaa kanavaa
 currency:
   title: valuutta
-  overview: valuuttojen tarkastelu
   create: luo valuutta
   edit: muokkaa valuuttaa
 family:
   title: tuoteperhe
-  overview: tuoteperheen tarkastelu
-  create: luo tuoteperhe
   edit: muokkaa tuoteperhettä
 locale:
   title: lokaatio
-  overview: lokaatioiden tarkastelu
   create: luo lokaatio
   edit: muokkaa lokaatiota
 product:
@@ -319,18 +314,12 @@ product:
   edit: muokkaa tuotetta
 group:
   title: ryhmä
-  overview: ryhmän yhteenveto
-  create: luo ryhmä
   edit: muokkaa ryhmää
 group type:
   title: ryhmän tyyppi
-  overview: ryhmätyypin yleiskatsaus
-  create: luo ryhmätyyppi
   edit: muokkaa ryhmätyyppiä
 variant group:
   title: tuotevariaatioryhmä
-  overview: tuotevariaatioryhmän yleiskatsaus
-  create: luo tuotevariaatioryhmä
   edit: muokkaa tuotevariaatioryhmää
 association type:
   title: sidoksen tyyppi
@@ -733,25 +722,6 @@ Current tab: Nykyinen välilehti
 Group: Ryhmä
 View group: Näytä ryhmä
 Products: Tuotteet
-pim_menu:
-  tab:
-    collect: Kerää
-    enrich: Rikastuta
-    settings: Asetukset
-    spread: Levitä
-  item:
-    association_type: Määritetyypit
-    attribute: Attribuutit
-    attribute_group: Attribuuttiryhmät
-    category: Kategoriat
-    channel: Kanavat
-    currency: Valuutat
-    family: Perheet
-    group: Ryhmät
-    group_type: Ryhmätyypit
-    locale: Alueet
-    product: Tuotteet
-    variant_group: Tuotevariaatioryhmät
 Properties: Ominaisuudet
 History: Historia
 pane.accordion:

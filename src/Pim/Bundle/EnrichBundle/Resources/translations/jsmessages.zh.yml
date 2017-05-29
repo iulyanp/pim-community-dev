@@ -36,6 +36,8 @@ flash:
     removed: 关联类型已删除
   attribute:
     removed: 属性已删除
+  attribute_group:
+    removed: 属性组已删除
   family:
     removed: 产品族已删除
   product:
@@ -204,6 +206,9 @@ pim_enrich:
           family: 选择一个品类
           save: 保存
           cancel: 取消
+    attribute:
+      scopable: 范围允许
+      global: 全局
     association_type:
       info:
         field_not_ready:
@@ -252,6 +257,21 @@ pim_enrich:
         updated_by: 更新者：
       btn:
         save: 保存
+    attribute_label:
+      pim_catalog_identifier: 标识
+      pim_catalog_text: 文本
+      pim_catalog_textarea: 文本区域
+      pim_catalog_number: 数量
+      pim_catalog_price_collection: 价格
+      pim_catalog_multiselect: 多选
+      pim_catalog_simpleselect: 单选
+      pim_catalog_file: 文件
+      pim_catalog_image: 图片
+      pim_catalog_boolean: "确定/取消"
+      pim_catalog_date: 日期
+      pim_catalog_metric: 公制
+      pim_reference_data_simpleselect: 参考数据简单选择
+      pim_reference_data_multiselect: 参考数据多项选择
     attribute_option:
       code: 代码
       label: 标签
@@ -290,6 +310,9 @@ pim_enrich:
         created_by: '创建者:'
         updated: 已更新
         updated_by: 更新者：
+    attribute_group:
+      info:
+        update_successful: 属性组已更新
   confirmation:
     leave: 你确定你要离开此页面？
     discard_changes: 如果你离开页面，将丢失更改 {{ entity }}。
@@ -301,7 +324,6 @@ pim_enrich:
   error:
     upload: 上传文件的过程中出错
   alert:
-    not_allowed: 你不是允许访问此页
     error_occured: 在页面加载时出错
   form:
     required: '（必填）'
@@ -448,6 +470,21 @@ pim_enrich:
           title: 历史
         products:
           title: 商品
+    attribute_group:
+      tab:
+        properties:
+          title: 属性
+          general: 常规属性
+          code: 代码
+          label_translations: 标签翻译
+        attribute:
+          title: 属性
+          table:
+            name: 名称
+            type: 类型
+            scope: 范围
+            localizable: 可本地化
+        history.title: 历史
     common:
       tab:
         attributes:
@@ -600,7 +637,6 @@ pim_enrich:
           help: 使用在目录树上 （由渠道中定义） 的产品类别来选择要导出的产品
         identifier:
           title: 标识
-          help: 你想要导出的产品标识，用逗号，空格或换行来隔开
         metric:
           operators:
             "=": 等于
@@ -664,8 +700,49 @@ pim_enrich:
   mass_edit_action:
     edit_common_attributes:
       description: 使用产品网格中的本地化语言 <span class="highlight">{{ locale }}</span> 和通道 <span class="highlight">{{ channel }}</span>对应的数据，对所选的产品属性进行编辑
+  index:
+    group:
+      create_btn: 创建组
+    user:
+      title: 用户
+      create_btn: 创建用户
+    user_role:
+      title: 角色
+      create_btn: 创建角色
+    user_group:
+      title: 分组
+      create_btn: 创建组
+    process_tracker:
+      title: 过程跟踪器
+    attribute:
+      modal_title: 选择属性类型
+    attribute_group:
+      create_btn: 创建
 pim_enrich.error:
   exception.title: 我靠 ！{{ status_code }} 出错了...
+page_title:
+  oro_default: 主界面
+  pim_enrich_attributegroup_index: 属性组
+  pim_enrich_attributegroup_create: 属性组 |创建
+  pim_enrich_categorytree_index: 目录树
+  pim_enrich_categorytree_create: 目录树|创建
+  pim_enrich_categorytree_create_tree: 目录树|创建
+  pim_enrich_attribute_index: 属性
+  pim_enrich_attribute_create: 属性|创建
+  pim_enrich_product_index: 商品
+  pim_enrich_family_index: 品类
+  pim_enrich_channel_index: 渠道
+  pim_enrich_channel_create: 通道|创建
+  pim_enrich_currency_index: 货币
+  pim_enrich_locale_index: 本地化语言
+  pim_enrich_group_index: 分组
+  pim_enrich_variant_group_index: 款式组
+  pim_enrich_associationtype_index: 关联类型
+  pim_enrich_grouptype_index: 分组类型
+  pim_enrich_mass_edit_action_choose: 批量编辑|选择
+  pim_enrich_mass_edit_action_configure: 批量编辑|配置
+  pim_enrich_job_tracker_index: 过程跟踪器
+  pim_enrich_job_tracker_show: 过程跟踪器 |显示作业
 batch_jobs:
   add_product_value:
     label: 添加商品值
@@ -689,3 +766,40 @@ batch_jobs:
     label: 添加到款式组
     perform:
       label: 添加到款式组
+pim_menu:
+  tab:
+    collect: 收集
+    enrich: 添加
+    settings: 设置 
+    system: 系统
+    spread: 传播
+  item:
+    association_type: 关联类型
+    attribute: 属性
+    attribute_group: 属性组
+    category: 分类
+    channel: 渠道
+    currency: 货币
+    family: 品类
+    group: 分组
+    group_type: 分组类型
+    locale: 本地化语言
+    product: 商品
+    variant_group: 款式组
+    export_history: 导出历史
+    export_profile: 导出配置文件
+    import_history: 导入历史
+    import_profile: 导入方案
+    configuration: 配置
+    user_management: 用户管理
+    user: 用户
+    user_group: 分组
+    user_role: 角色
+    info: 系统信息
+    job_tracker: 过程跟踪器
+pim_header:
+  user:
+    logout: 退出登录
+    user_account: 我的帐户
+pim_notification:
+  mark_all_as_read: 标记所有为已读

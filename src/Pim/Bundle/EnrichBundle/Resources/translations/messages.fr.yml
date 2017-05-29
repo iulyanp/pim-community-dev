@@ -269,9 +269,8 @@ pim_enrich:
         label: Choisir un type de données référentielles
 attribute:
   title: attribut
-  overview: Liste des attributs
-  create: Créer un attribut
   edit: Modifier un attribut
+  create: Créer un attribut
 attribute group:
   title: groupe d'attributs
   overview: Liste des groupes d'attributs
@@ -299,17 +298,13 @@ channel:
   edit: modifier un canal
 currency:
   title: devise
-  overview: Liste des devises
   create: Créer une monnaie
   edit: modifier une monnaie
 family:
   title: famille
-  overview: Liste des familles
-  create: Créer une famille
   edit: modifier une famille
 locale:
   title: locale
-  overview: Liste des locales
   create: Créer une locale
   edit: Modifier une locale
 product:
@@ -319,18 +314,12 @@ product:
   edit: Modifier un produit
 group:
   title: groupe
-  overview: Liste des groupes
-  create: Créer un groupe
   edit: modifier un groupe
 group type:
   title: type de groupe
-  overview: Liste des types de groupe
-  create: Créer le type de groupe
   edit: modifier le type de groupe
 variant group:
   title: groupe de variantes
-  overview: Liste des groupes de variantes
-  create: Créer un groupe de variantes
   edit: Modifier un groupe de variantes
 association type:
   title: type d'association
@@ -733,25 +722,6 @@ Current tab: Onglet actif
 Group: Groupe
 View group: Afficher le groupe
 Products: Produits
-pim_menu:
-  tab:
-    collect: Collecter
-    enrich: Enrichir
-    settings: Paramètres
-    spread: Diffuser
-  item:
-    association_type: Types d'association
-    attribute: Attributs
-    attribute_group: Groupes d'attributs
-    category: Catégories
-    channel: Canaux
-    currency: Devises
-    family: Familles
-    group: Groupes
-    group_type: Types de groupe
-    locale: Locales
-    product: Produits
-    variant_group: Groupes de variantes
 Properties: Propriétés
 History: Historique
 pane.accordion:

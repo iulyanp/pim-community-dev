@@ -44,11 +44,13 @@
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Channel</directory>
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Locale</directory>
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Media</directory>
+            <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Currency</directory>
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Token</directory>
         </testsuite>
 
         <testsuite name="PIM_Api_Bundle_Controllers_Catalog_Integration_Test">
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Attribute</directory>
+            <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/AttributeGroup</directory>
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/AttributeOption</directory>
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Category</directory>
             <directory suffix="Integration.php">../src/Pim/Bundle/ApiBundle/tests/integration/Controller/Family</directory>

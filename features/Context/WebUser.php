@@ -55,7 +55,13 @@ class WebUser extends RawMinkContext
     public function iCreateANew($entity)
     {
         $entity = implode('', array_map('ucfirst', explode(' ', $entity)));
-        $this->getPage(sprintf('%s index', $entity))->clickCreationLink();
+
+        $this->spin(function () use ($entity) {
+            $this->getPage(sprintf('%s index', $entity))->clickCreationLink();
+
+            return true;
+        }, sprintf('Cannot create a new %s', $entity));
+
         $this->getNavigationContext()->currentPage = sprintf('%s creation', $entity);
         $this->wait();
     }
@@ -82,7 +88,7 @@ class WebUser extends RawMinkContext
      */
     public function iChooseTheAttributeType($type)
     {
-        $this->getCurrentPage()->clickLink($type);
+        $this->getCurrentPage()->selectAttributeType($type);
         $this->wait();
     }
 
@@ -96,12 +102,12 @@ class WebUser extends RawMinkContext
         foreach ($pages->getHash() as $data) {
             $url = $this->getSession()->evaluateScript(sprintf('return Routing.generate("%s");', $data['page']));
             $this->getMainContext()->executeScript(
-                sprintf("require(['oro/navigation'], function (Nav) { Nav.getInstance().setLocation('%s'); } );", $url)
+                sprintf("require(['backbone'], function (Backbone) { Backbone.history.navigate('#%s'); } );", $url)
             );
             $this->wait();
 
             $currentUrl = $this->getSession()->getCurrentUrl();
-            $currentUrl = explode('#url=', $currentUrl);
+            $currentUrl = explode('#', $currentUrl);
             $currentUrl = end($currentUrl);
             $currentUrl = explode('|g/', $currentUrl);
             $currentUrl = reset($currentUrl);
@@ -205,7 +211,7 @@ class WebUser extends RawMinkContext
      */
     public function iShouldSeeVersionsInTheHistory($expectedCount)
     {
-        $actualVersions = $this->spin(function () use ($expectedCount) {
+        $this->spin(function () use ($expectedCount) {
             $actualVersions = $this->getSession()->getPage()->findAll('css', '.history-panel tbody tr.product-version');
 
             return ((int) $expectedCount) === count($actualVersions);
@@ -292,7 +298,6 @@ class WebUser extends RawMinkContext
     public function iSwitchTheLocaleTo($locale)
     {
         $this->getCurrentPage()->getElement('Main context selector')->switchLocale($locale);
-        $this->wait();
     }
 
     /**
@@ -427,8 +432,12 @@ class WebUser extends RawMinkContext
      */
     public function theAttributeShouldBeInPosition($attribute, $position)
     {
-        $actual = $this->getCurrentPage()->getAttributePosition($attribute);
-        assertEquals($position, $actual);
+        $this->spin(function () use ($attribute, $position) {
+            $actual = $this->getCurrentPage()->getAttributePosition($attribute);
+            assertEquals($position, $actual);
+
+            return true;
+        }, sprintf('Cannot assert that %s is at position %s', $attribute, $position));
     }
 
     /**
@@ -860,7 +869,8 @@ class WebUser extends RawMinkContext
             throw $this->createExpectationException(
                 sprintf(
                     'Order of choices for field "%s" is not as expected, got: %s',
-                    $fieldName, implode(', ', $fieldsArray)
+                    $fieldName,
+                    implode(', ', $fieldsArray)
                 )
             );
         }
@@ -973,7 +983,7 @@ class WebUser extends RawMinkContext
             }
         }
     }
-    
+
     /**
      * @param string $attributes
      *
@@ -1108,7 +1118,6 @@ class WebUser extends RawMinkContext
         }
 
         $removeLink->click();
-        $this->wait();
     }
 
     /**
@@ -1255,7 +1264,11 @@ class WebUser extends RawMinkContext
         }
 
         foreach ($table->getRowsHash() as $field => $value) {
-            $this->getCurrentPage()->fillField($field, $value, $element);
+            $this->spin(function () use ($field, $value, $element) {
+                $this->getCurrentPage()->fillField($field, $value, $element);
+
+                return true;
+            }, sprintf('Cannot fill the field %s', $field));
         }
     }
 
@@ -1381,11 +1394,15 @@ class WebUser extends RawMinkContext
     public function iCreateTheFollowingAttributeOptions(TableNode $table)
     {
         foreach ($table->getHash() as $data) {
-            $code = $data['Code'];
-            unset($data['Code']);
+            $this->spin(function () use ($data) {
+                $code = $data['Code'];
+                unset($data['Code']);
 
-            $this->getCurrentPage()->addOption($code, $data);
-            $this->wait();
+                $this->getCurrentPage()->addOption($code, $data);
+
+                $this->wait();
+                return true;
+            }, sprintf('Unable to create the attribute option %s', $data['Code']));
         }
     }
 
@@ -1432,14 +1449,22 @@ class WebUser extends RawMinkContext
     }
 
     /**
-     * @param string $button
+     * $modalWait is a temporary solution waiting for Attributes PEFization
+     * TODO Remove the $modalWait parameter after the merge of TIP-732
      *
-     * @Given /^I press the "([^"]*)" button$/
+     * @param string      $button
+     * @param string|null $modalWait
+     *
+     * @Given /^I press the "([^"]*)" button( and wait for modal)?$/
      */
-    public function iPressTheButton($button)
+    public function iPressTheButton($button, $modalWait = null)
     {
-        $this->spin(function () use ($button) {
+        $this->spin(function () use ($button, $modalWait) {
             $this->getCurrentPage()->pressButton($button, true);
+
+            if (null !== $modalWait) {
+                return null !== $this->getCurrentPage()->find('css', '.modal');
+            }
 
             return true;
         }, sprintf("Can not find any '%s' button", $button));
@@ -1558,10 +1583,15 @@ class WebUser extends RawMinkContext
      */
     public function iPressOnTheDropdownButton($item, $button)
     {
-        $this
-            ->getCurrentPage()
-            ->getDropdownButtonItem($item, $button)
-            ->click();
+        $this->spin(function () use ($item, $button) {
+            $this
+                ->getCurrentPage()
+                ->getDropdownButtonItem($item, $button)
+                ->click();
+
+            return true;
+        }, sprintf('Cannot click on item %s ', $item));
+
         $this->wait();
     }
 
@@ -1570,11 +1600,14 @@ class WebUser extends RawMinkContext
      */
     public function iSaveAndBackToTheGrid()
     {
-        $this
-            ->getCurrentPage()
-            ->getSaveAndBackButton()
-            ->click();
-        $this->wait();
+        $this->spin(function () {
+            $this
+                ->getCurrentPage()
+                ->getSaveAndBackButton()
+                ->click();
+
+            return true;
+        }, 'Cannot click on the back to the grid button');
     }
 
     /**
@@ -1785,59 +1818,17 @@ class WebUser extends RawMinkContext
      */
     public function iWaitForTheJobToFinish($code)
     {
-        $condition = '$("#status").length && '.
-            '/(completed|stopped|failed|terminé|arrêté|en échec)$/.test($("#status").text().trim().toLowerCase())';
+        $jobExecution = $this->spin(function () use ($code) {
+            $jobInstance = $this->getFixturesContext()->getJobInstance($code);
+            // Force to retrieve its job executions
+            $jobInstance->getJobExecutions()->setInitialized(false);
 
-        try {
-            $this->wait($condition);
-        } catch (BehaviorException $e) {
-            $jobInstance  = $this->getFixturesContext()->getJobInstance($code);
-            $jobExecution = $jobInstance->getJobExecutions()->first();
-            if (false === $jobExecution) {
-                throw new \Exception('No job execution found');
-            }
+            $this->getFixturesContext()->refresh($jobInstance);
+            $jobExecution = $jobInstance->getJobExecutions()->last();
+            $this->getFixturesContext()->refresh($jobExecution);
 
-            $log = $jobExecution->getLogFile();
-            if (is_file($log)) {
-                $dir = getenv('WORKSPACE');
-                $id  = getenv('BUILD_ID');
-
-                if (false !== $dir && false !== $id) {
-                    $target = sprintf('%s/../builds/%s/batch_log/%s', $dir, $id, pathinfo($log, PATHINFO_BASENAME));
-
-                    $fs = new \Symfony\Component\Filesystem\Filesystem();
-                    $fs->copy($log, $target);
-
-                    $log = sprintf(
-                        'http://ci.akeneo.com/screenshots/%s/%s/batch_log/%s',
-                        getenv('JOB_NAME'),
-                        $id,
-                        pathinfo($log, PATHINFO_BASENAME)
-                    );
-                }
-
-                $message = sprintf('Job "%s" failed, log available at %s', $code, $log);
-                $this->getMainContext()->addErrorMessage($message);
-            } else {
-                $this->getMainContext()->addErrorMessage(sprintf('Job "%s" failed, no log available', $code));
-            }
-
-            // Get and print the normalized jobexecution to ease debugging
-            $this->getSession()->executeScript(
-                sprintf(
-                    '$.get("/%s/%s_execution/%d.json", function (resp) { window.executionLog = resp; });',
-                    $jobInstance->getType() === 'import' ? 'collect' : 'spread',
-                    $jobInstance->getType(),
-                    $jobExecution->getId()
-                )
-            );
-            $this->wait();
-            $executionLog = $this->getSession()->evaluateScript("return window.executionLog;");
-            $this->getMainContext()->addErrorMessage(sprintf('Job execution: %s', print_r($executionLog, true)));
-
-            // Call the wait method again to trigger timeout failure
-            $this->wait($condition);
-        }
+            return $jobExecution && !$jobExecution->isRunning();
+        }, sprintf('The job execution of "%s" was too long', $code));
     }
 
     /**
@@ -2492,13 +2483,13 @@ class WebUser extends RawMinkContext
      */
     protected function waitForMassEditJobToFinish($code)
     {
-        $jobInstance = $this->getFixturesContext()->getJobInstance($code);
-        // Force to retrieve its job executions
-        $jobInstance->getJobExecutions()->setInitialized(false);
-        $jobExecution = $jobInstance->getJobExecutions()->last();
-        if (false === $jobExecution) {
-            throw new \InvalidArgumentException(sprintf('No job execution found for job with code "%s"', $code));
-        }
+        $jobExecution = $this->spin(function () use ($code) {
+            $jobInstance = $this->getFixturesContext()->getJobInstance($code);
+            // Force to retrieve its job executions
+            $jobInstance->getJobExecutions()->setInitialized(false);
+
+            return $jobInstance->getJobExecutions()->last();
+        }, sprintf('No job execution found for job with code "%s"', $code));
 
         $this->openPage('massEditJob show', ['id' => $jobExecution->getId()]);
 

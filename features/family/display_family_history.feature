@@ -1,3 +1,4 @@
+@javascript
 Feature: Display the family history
   In order to know who, when and what changes has been made to an family
   As an administrator
@@ -7,13 +8,12 @@ Feature: Display the family history
     Given the "default" catalog configuration
     And I am logged in as "Peter"
     And the following attribute group:
-      | code    | label-en_US | group | type             |
-      | general | General     | other | pim_catalog_text |
+      | code    | label-en_US |
+      | general | General     |
     And the following attributes:
       | label-en_US | group   | type             | code        |
       | Description | General | pim_catalog_text | description |
 
-  @javascript
   Scenario: Successfully create a family and see the history
     Given I am on the families page
     And I create a new family

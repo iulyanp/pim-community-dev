@@ -32,6 +32,13 @@ services:
             - '%pim_catalog.entity.attribute_option.class%'
             - '@pim_catalog.repository.attribute_option'
 
+    pim_api.repository.attribute_group:
+        class: '%pim_api.repository.api_resource.class%'
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '%pim_catalog.entity.attribute_group.class%'
+            - '@pim_catalog.repository.attribute_group'
+
     pim_api.repository.category:
         class: '%pim_api.repository.api_resource.class%'
         arguments:
@@ -66,3 +73,10 @@ services:
             - '@doctrine.orm.entity_manager'
             - '%akeneo_file_storage.model.file_info.class%'
             - '@akeneo_file_storage.repository.file_info'
+
+    pim_api.repository.currency:
+        class: '%pim_api.repository.api_resource.class%'
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '%pim_catalog.entity.currency.class%'
+            - '@pim_catalog.repository.currency'

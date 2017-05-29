@@ -34,9 +34,14 @@ config:
         pim/variant-group-manager:
             urls:
                 get: pim_enrich_variant_group_rest_get
-
+        pim/controller/group:
+            fetcher: group
+        pim/controller/variant-group:
+            fetcher: variant-group
         pim/remover/association-type:
             url: pim_enrich_associationtype_rest_remove
+        pim/remover/attribute-group:
+            url: pim_enrich_attributegroup_rest_remove
         pim/remover/group-type:
             url: pim_enrich_grouptype_rest_remove
         pim/remover/channel:
@@ -68,6 +73,22 @@ config:
             url: pim_enrich_job_instance_rest_import_put
         pim/saver/job-instance-export:
             url: pim_enrich_job_instance_rest_export_put
+        pim/form/common/attributes/create-button:
+            attribute_icons:
+                pim_catalog_identifier:          asterisk
+                pim_catalog_text:                font
+                pim_catalog_textarea:            file-text-alt
+                pim_catalog_number:              sort-by-order
+                pim_catalog_price_collection:    money
+                pim_catalog_multiselect:         tags
+                pim_catalog_simpleselect:        tag
+                pim_catalog_file:                file
+                pim_catalog_image:               camera-retro
+                pim_catalog_boolean:             check
+                pim_catalog_date:                calendar
+                pim_catalog_metric:              beaker
+                pim_reference_data_multiselect:  tags
+                pim_reference_data_simpleselect: tag
         pim/fetcher-registry:
             fetchers:
                 default: pim/base-fetcher
@@ -87,7 +108,9 @@ config:
                     module: pim/attribute-group-fetcher
                     options:
                         urls:
+                            search: pim_enrich_attributegroup_rest_search
                             list: pim_enrich_attributegroup_rest_index
+                            get: pim_enrich_attributegroup_rest_get
                 attribute:
                     module: pim/attribute-fetcher
                     options:
@@ -95,6 +118,11 @@ config:
                         urls:
                             list: pim_enrich_attribute_rest_index
                             get: pim_enrich_attribute_rest_get
+                attribute-type:
+                    module: pim/base-fetcher
+                    options:
+                        urls:
+                            list: pim_enrich_attribute_types_index
                 family:
                     module: pim/base-fetcher
                     options:
@@ -122,11 +150,6 @@ config:
                     options:
                         urls:
                             list: pim_enrich_currency_rest_index
-                product-completeness:
-                    module: pim/completeness-fetcher
-                    options:
-                        urls:
-                            get: pim_enrich_product_completeness_rest_get
                 group:
                     module: pim/base-fetcher
                     options:
@@ -186,7 +209,291 @@ config:
                         urls:
                             get: pim_enrich_job_execution_rest_get
 
+        pim/controller-registry:
+            defaultController:
+                module: pim/controller/template
+            controllers:
+                pim_enrich_associationtype_edit:
+                    module: pim/controller/association-type
+                    aclResourceId: pim_enrich_associationtype_edit
+                pim_enrich_associationtype_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_associationtype_index
+                    config:
+                        entity: association-type
+                pim_enrich_attribute_create:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_attribute_create
+                pim_enrich_attribute_edit:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_attribute_edit
+                pim_enrich_attributegroup_create:
+                    module: pim/controller/attribute-group/create
+                    aclResourceId: pim_enrich_attributegroup_create
+                pim_enrich_attributegroup_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_attributegroup_index
+                    config:
+                        entity: attribute-group
+                pim_enrich_attributegroup_edit:
+                    module: pim/controller/attribute-group/edit
+                    aclResourceId: pim_enrich_attributegroup_edit
+                pim_enrich_categorytree_create:
+                    module: pim/controller/form
+                    aclResourceId:  pim_enrich_product_category_create
+                pim_enrich_categorytree_edit:
+                    module: pim/controller/form
+                    aclResourceId:  pim_enrich_product_category_edit
+                pim_enrich_categorytree_index:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_product_category_list
+                pim_enrich_channel_edit:
+                    module: pim/controller/channel/edit
+                    aclResourceId: pim_enrich_channel_edit
+                pim_enrich_channel_create:
+                    module: pim/controller/channel/edit
+                    aclResourceId: pim_enrich_channel_create
+                pim_enrich_channel_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_channel_index
+                    config:
+                        entity: channel
+                pim_enrich_grouptype_edit:
+                    module: pim/controller/group-type
+                    aclResourceId: pim_enrich_grouptype_edit
+                pim_enrich_product_edit:
+                    module: pim/controller/product
+                pim_enrich_group_edit:
+                    module: pim/controller/group
+                    aclResourceId: pim_enrich_group_edit
+                pim_enrich_variant_group_edit:
+                    module: pim/controller/variant-group
+                    aclResourceId: pim_enrich_variant_group_edit
+                pim_enrich_channel_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_channel_index
+                    config:
+                        entity: channel
+                pim_importexport_export_profile_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_importexport_export_profile_index
+                    config:
+                        entity: export-profile
+                pim_importexport_import_profile_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_importexport_export_profile_index
+                    config:
+                        entity: import-profile
+                pim_importexport_export_profile_edit:
+                    module: pim/controller/job-instance
+                    aclResourceId: pim_importexport_export_profile_edit
+                pim_importexport_import_profile_edit:
+                    module: pim/controller/job-instance
+                    aclResourceId: pim_importexport_import_profile_edit
+                pim_importexport_import_profile_show:
+                    module: pim/controller/job-instance
+                    aclResourceId: pim_importexport_import_profile_show
+                pim_importexport_export_profile_show:
+                    module: pim/controller/job-instance
+                    aclResourceId: pim_importexport_export_profile_show
+                pim_enrich_currency_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_currency_index
+                    config:
+                        entity: currency
+                pim_enrich_currency_toggle:
+                    module: pim/controller/redirect
+                    aclResourceId: pim_enrich_currency_toggle
+                pim_enrich_mass_edit_action_sequential_edit:
+                    module: pim/controller/redirect
+                pim_enrich_mass_edit_product_action_choose:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_mass_edit
+                pim_enrich_mass_edit_product_action_configure:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_mass_edit
+                pim_enrich_mass_edit_product_action_perform:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_mass_edit
+                pim_enrich_family_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_family_index
+                    config:
+                        entity: family
+                pim_enrich_family_create:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_family_create
+                pim_enrich_family_edit:
+                    module: pim/controller/family
+                    aclResourceId: pim_enrich_family_index
+                pim_enrich_mass_edit_family_action_choose:
+                    module: pim/controller/form
+                pim_enrich_mass_edit_family_action_configure:
+                    module: pim/controller/form
+                pim_enrich_mass_edit_family_action_perform:
+                    module: pim/controller/form
+                oro_user_index:
+                    module: pim/controller/common/index
+                    config:
+                        entity: user
+                oro_user_create:
+                    module: pim/controller/form
+                oro_user_update:
+                    module: pim/controller/user
+                oro_user_profile_update:
+                    module: pim/controller/user
+                oro_user_role_index:
+                    module: pim/controller/common/index
+                    config:
+                        entity: user-role
+                oro_user_role_create:
+                    module: pim/controller/form
+                oro_user_role_update:
+                    module: pim/controller/role
+                oro_user_group_create:
+                    module: pim/controller/form
+                oro_user_group_index:
+                    module: pim/controller/common/index
+                    config:
+                        entity: user-group
+                oro_user_group_update:
+                    module: pim/controller/form
+                pim_enrich_mass_edit_action_choose:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_mass_edit_action_choose
+                pim_enrich_mass_edit_action_configure:
+                    module: pim/controller/form
+                    aclResourceId: pim_enrich_mass_edit_action_configure
+                pim_importexport_import_profile_launch_upload:
+                    module: pim/controller/redirect
+                    aclResourceId: pim_importexport_import_profile_launch_upload
+                pim_importexport_import_profile_launch:
+                    module: pim/controller/redirect
+                    aclResourceId: pim_importexport_import_profile_launch
+                pim_importexport_import_profile_remove:
+                    module: pim/controller/redirect
+                    aclResourceId: pim_importexport_import_profile_remove
+                pim_importexport_export_profile_launch:
+                    module: pim/controller/redirect
+                    aclResourceId: pim_importexport_export_profile_launch
+                pim_importexport_export_profile_remove:
+                    module: pim/controller/redirect
+                    aclResourceId: pim_importexport_export_profile_remove
+                oro_user_profile_update:
+                    module: pim/controller/form
+                pim_enrich_locale_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_locale_index
+                    config:
+                        entity: locale
+                pim_enrich_attribute_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_attribute_index
+                    config:
+                          entity: attribute
+                pim_enrich_attribute_sort:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_attribute_sort
+                pim_enrich_attribute_remove:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_attribute_remove
+                pim_enrich_product_index:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_product_index
+                pim_enrich_product_create:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_product_create
+                pim_enrich_variant_group_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_variant_group_index
+                    config:
+                        entity: variant-group
+                pim_enrich_variant_group_create:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_variant_group_create
+                pim_enrich_group_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_group_index
+                    config:
+                        entity: group
+                pim_enrich_group_create:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_group_create
+                pim_enrich_group_history:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_group_history
+                pim_enrich_associationtype_index:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_associationtype_index
+                pim_enrich_associationtype_create:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_associationtype_create
+                pim_enrich_grouptype_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_grouptype_index
+                    config:
+                        entity: group-type
+                pim_enrich_grouptype_create:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_grouptype_create
+                pim_enrich_grouptype_remove:
+                    module: pim/controller/template
+                    aclResourceId: pim_enrich_grouptype_remove
+                pim_enrich_job_tracker_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_enrich_job_tracker_index
+                    config:
+                        entity: process
+                pim_importexport_import_execution_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_importexport_import_execution_index
+                    config:
+                        entity: import-execution
+                pim_importexport_import_execution_show:
+                    module: pim/controller/job-execution
+                    aclResourceId: pim_importexport_import_execution_show
+                pim_importexport_export_execution_index:
+                    module: pim/controller/common/index
+                    aclResourceId: pim_importexport_export_execution_index
+                    config:
+                        entity: export-execution
+                pim_importexport_export_execution_show:
+                    module: pim/controller/job-execution
+                    aclResourceId: pim_importexport_export_execution_show
+                pim_enrich_job_tracker_show:
+                    module: pim/controller/job-execution
+                oro_config_configuration_system:
+                    module: pim/controller/system
+
     paths:
+        pim/app:                            pimenrich/js/app
+        pim/router:                         pimenrich/js/router
+        pim/route-matcher:                  pimenrich/js/route-matcher
+        pim/page-title:                     pimenrich/js/page-title
+        pim/init-translator:                pimenrich/js/init-translator
+
+        # Controllers
+        pim/controller-registry:               pimenrich/js/controller/registry
+        pim/controller/base:                   pimenrich/js/controller/base
+        pim/controller/template:               pimenrich/js/controller/template
+        pim/controller/form:                   pimenrich/js/controller/form
+        pim/controller/product:                pimenrich/js/controller/product
+        pim/controller/family:                 pimenrich/js/controller/family
+        pim/controller/channel/edit:           pimenrich/js/controller/channel/edit
+        pim/controller/common/index:           pimenrich/js/controller/common/index
+        pim/controller/association-type:       pimenrich/js/controller/association-type
+        pim/controller/redirect:               pimenrich/js/controller/redirect
+        pim/controller/job-instance:           pimenrich/js/controller/job-instance
+        pim/controller/group:                  pimenrich/js/controller/group
+        pim/controller/variant-group:          pimenrich/js/controller/variant-group
+        pim/controller/role:                   pimenrich/js/controller/role
+        pim/controller/job-execution:          pimenrich/js/controller/job-execution
+        pim/controller/group-type:             pimenrich/js/controller/group-type
+        pim/controller/system:                 pimenrich/js/controller/system
+        pim/controller/user:                   pimenrich/js/controller/user
+        pim/controller/attribute-group/edit:   pimenrich/js/controller/attribute-group/edit
+        pim/controller/attribute-group/create: pimenrich/js/controller/attribute-group/create
+
         jquery.wizard:                      pimenrich/js/jquery.wizard
         jstree/jquery.jstree.tree_selector: pimenrich/js/jstree/jquery.jstree.tree_selector
         jstree/nested_switch:               pimenrich/js/jstree/jquery.jstree.nested_switch
@@ -220,7 +527,6 @@ config:
         pim/group-manager:           pimenrich/js/manager/group-manager
         pim/attribute-manager:       pimenrich/js/manager/attribute-manager
         pim/attribute-group-manager: pimenrich/js/manager/attribute-group-manager
-        pim/history-item-manager:    pimenrich/js/manager/history-item-manager
 
         # Fetcher
         pim/fetcher-registry:        pimenrich/js/fetcher/fetcher-registry
@@ -235,6 +541,7 @@ config:
         # Remover
         pim/remover/base:                pimenrich/js/remover/base-remover
         pim/remover/association-type:    pimenrich/js/remover/association-type-remover
+        pim/remover/attribute-group:     pimenrich/js/remover/attribute-group-remover
         pim/remover/group-type:          pimenrich/js/remover/group-type-remover
         pim/remover/channel:             pimenrich/js/remover/channel
         pim/remover/family:              pimenrich/js/remover/family
@@ -267,7 +574,11 @@ config:
         pim/form: pimenrich/js/product/form
 
         # Association type
-        pim/association-type-edit-form/delete:                 pimenrich/js/association-type/form/delete
+        pim/association-type-edit-form/delete: pimenrich/js/association-type/form/delete
+
+        # Attribute group
+        pim/attribute-group-edit-form/delete: pimenrich/js/attribute-group/form/delete
+        pim/attribute-group-edit-form/list:   pimenrich/js/attribute-group/form/list
 
         # Group type
         pim/group-type-edit-form/delete:                 pimenrich/js/group-type/form/delete
@@ -275,10 +586,9 @@ config:
         # Channel
         pim/channel-edit-form/delete:                           pimenrich/js/channel/form/delete
         pim/channel-edit-form/save:                             pimenrich/js/channel/form/save
-        pim/channel-edit-form/properties/general:               pimenrich/js/channel/form/properties/general
         pim/channel-edit-form/properties/general/currencies:    pimenrich/js/channel/form/properties/general/currencies
         pim/channel-edit-form/properties/general/locales:       pimenrich/js/channel/form/properties/general/locales
-        pim/channel-edit-form/properties/general/category:      pimenrich/js/channel/form/properties/general/category
+        pim/channel-edit-form/properties/general/category-tree: pimenrich/js/channel/form/properties/general/category-tree
         pim/channel-edit-form/properties/conversion-unit:       pimenrich/js/channel/form/properties/conversion-unit
 
         # Family
@@ -332,7 +642,9 @@ config:
         pim/product-edit-form/status-switcher:             pimenrich/js/product/form/status-switcher
         pim/product-edit-form/download-pdf:                pimenrich/js/product/form/download-pdf
         pim/product-edit-form/attributes:                  pimenrich/js/product/form/attributes
-        pim/product-edit-form/back-to-grid:                pimenrich/js/product/form/back-to-grid
+
+        # Attribute group
+        pim/attribute-group-form/tab/attribute: pimenrich/js/attribute-group/form/tab/attribute
 
         # Exports
         pim/job/product/edit/content:                                pimenrich/js/job/product/edit/content
@@ -370,8 +682,6 @@ config:
 
         # Filters
         pim/filter/filter:                     pimenrich/js/filter/filter
-        pim/filter/text:                       pimenrich/js/filter/text
-        pim/filter/simpleselect:               pimenrich/js/filter/simpleselect
         pim/filter/product/family:             pimenrich/js/filter/product/family
         pim/filter/product/enabled:            pimenrich/js/filter/product/enabled
         pim/filter/product/updated:            pimenrich/js/filter/product/updated
@@ -411,7 +721,6 @@ config:
         pim/attribute-option/create:        pimenrich/js/attribute-option/create
 
         # Variant group
-        pim/variant-group-edit-form/products:               pimenrich/js/variant-group/form/products
         pim/variant-group-edit-form/delete:                 pimenrich/js/variant-group/form/delete
         pim/variant-group-edit-form/no-attribute:           pimenrich/js/variant-group/form/no-attribute
         pim/variant-group-edit-form/properties/general:     pimenrich/js/variant-group/form/properties/general
@@ -425,18 +734,13 @@ config:
         pim/group-edit-form/save:                   pimenrich/js/group/form/save
 
         # Common
-        pim/common/grid:                       pimenrich/js/form/common/grid
-        pim/common/redirect:                   pimenrich/js/form/common/redirect
-        pim/common/column-list-view:           pimenrich/js/common/column-list-view
-        pim/common/tab/history:                pimenrich/js/form/common/tab/history
-        pim/common/tab/properties:             pimenrich/js/form/common/tab/properties
-        pim/common/properties/translation:     pimenrich/js/form/common/properties/translation
-        pim/common/properties/general:         pimenrich/js/form/common/properties/general
-        pim/common/add-attribute:              pimenrich/js/form/common/attributes/add-attribute
-        pim/common/add-attribute-line:         pimenrich/js/form/common/attributes/add-attribute-line
-        pim/common/add-attribute-footer:       pimenrich/js/form/common/attributes/add-attribute-footer
-        pim/common/attribute-group/add/line:   pimenrich/js/form/common/attribute-group/add/line
-        pim/common/attribute-group/add/footer: pimenrich/js/form/common/attribute-group/add/footer
+        pim/common/grid:                   pimenrich/js/form/common/grid
+        pim/common/redirect:               pimenrich/js/form/common/redirect
+        pim/common/column-list-view:       pimenrich/js/common/column-list-view
+        pim/common/tab/history:            pimenrich/js/form/common/tab/history
+        pim/common/tab/properties:         pimenrich/js/form/common/tab/properties
+        pim/common/properties/translation: pimenrich/js/form/common/properties/translation
+        pim/common/properties/general:     pimenrich/js/form/common/properties/general
         pim/common/grid:                   pimenrich/js/form/common/grid
         pim/common/redirect:               pimenrich/js/form/common/redirect
         pim/common/column-list-view:       pimenrich/js/common/column-list-view
@@ -446,9 +750,12 @@ config:
         pim/common/add-select:             pimenrich/js/form/common/add-select/select
         pim/common/add-select/line:        pimenrich/js/form/common/add-select/line
         pim/common/add-select/footer:      pimenrich/js/form/common/add-select/footer
+        pim/create/properties/general:     pimenrich/js/create/form/properties/general
 
         # Root
         pim/form/common/edit-form: pimenrich/js/form/common/edit-form
+
+        pim/app: pimenrich/js/app
 
         pim/form/common/label:                               pimenrich/js/form/common/label
         pim/form/common/group-selector:                      pimenrich/js/form/common/group-selector
@@ -466,10 +773,19 @@ config:
         pim/form/common/attributes:                          pimenrich/js/form/common/attributes
         pim/form/common/attributes/copy:                     pimenrich/js/form/common/attributes/copy
         pim/form/common/attributes/copy-field:               pimenrich/js/form/common/attributes/copy-field
+        pim/form/common/attributes/create-button:            pimenrich/js/form/common/attributes/create-button
         pim/form/common/download-file:                       pimenrich/js/form/common/download-file
         pim/form/common/index/index:                         pimenrich/js/form/common/index/index
         pim/form/common/index/grid:                          pimenrich/js/form/common/index/grid
         pim/form/common/index/create-button:                 pimenrich/js/form/common/index/create-button
+        pim/form/common/index/confirm-button:                pimenrich/js/form/common/index/confirm-button
+        pim/menu/menu:                                       pimenrich/js/menu/menu
+        pim/menu/tab:                                        pimenrich/js/menu/tab
+        pim/menu/item:                                       pimenrich/js/menu/item
+        pim/header/header:                                   pimenrich/js/header/header
+        pim/header/logo:                                     pimenrich/js/header/logo
+        pim/header/user:                                     pimenrich/js/header/user
+
 
         # Fields
         pim/field:                  pimenrich/js/product/field/field
@@ -488,6 +804,7 @@ config:
         # Product add select
         pim/product/add-select/attribute:      pimenrich/js/product/form/attributes/add-select/attribute/select
         pim/product/add-select/attribute/line: pimenrich/js/product/form/attributes/add-select/attribute/line
+        pim/attribute-group/add-select/attribute: pimenrich/js/attribute-group/form/tab/select
 
         # Formatters
         pim/formatter/choices/base: pimenrich/js/formatter/choices/base
@@ -495,7 +812,6 @@ config:
 
         # Grid view selector
         pim/grid/view-selector/selector: pimenrich/js/grid/view-selector
-        pim/grid/view-selector/footer: pimenrich/js/grid/view-selector-footer
         pim/grid/view-selector/line: pimenrich/js/grid/view-selector-line
         pim/grid/view-selector/create-view: pimenrich/js/grid/view-selector-create-view
         pim/grid/view-selector/save-view: pimenrich/js/grid/view-selector-save-view
@@ -528,14 +844,18 @@ config:
         pim/template/form/tab/attribute/attribute-group-selector: pimenrich/templates/form/tab/attributes/attribute-group-selector.html
         pim/template/form/tab/attribute/copy:                     pimenrich/templates/form/tab/attributes/copy.html
         pim/template/form/tab/attribute/copy-field:               pimenrich/templates/form/tab/attributes/copy-field.html
+        pim/template/form/tab/attribute/create-button:            pimenrich/templates/form/tab/attributes/create-button.html
+        pim/template/form/tab/attribute/create-modal-content:     pimenrich/templates/form/tab/attributes/create-modal-content.html
         pim/template/form/redirect:                               pimenrich/templates/form/redirect.html
         pim/template/form/download-file:                          pimenrich/templates/form/download-file.html
         pim/template/form/index/index:                            pimenrich/templates/form/index/index.html
         pim/template/form/index/create-button:                    pimenrich/templates/form/index/create-button.html
+        pim/template/form/index/confirm-button:                   pimenrich/templates/form/index/confirm-button.html
 
-        pim/template/association-type/tab/properties/general:     pimenrich/templates/association-type/tab/properties/general.html
+        # Attribute group
+        pim/template/form/attribute-group/tab/attribute: pimenrich/templates/attribute-group/tab/attribute.html
+        pim/template/form/attribute-group/list:          pimenrich/templates/attribute-group/list.html
 
-        pim/template/channel/tab/properties/general:                pimenrich/templates/channel/tab/properties/general.html
         pim/template/channel/tab/properties/general/currencies:     pimenrich/templates/channel/tab/properties/general/currencies.html
         pim/template/channel/tab/properties/general/locales:        pimenrich/templates/channel/tab/properties/general/locales.html
         pim/template/channel/tab/properties/general/category-tree:  pimenrich/templates/channel/tab/properties/general/category-tree.html
@@ -587,11 +907,21 @@ config:
         pim/template/i18n/flag:                              pimenrich/templates/i18n/flag.html
         pim/template/error/error:                            pimenrich/templates/error/error.html
 
-        pim/template/variant-group/tab/properties/general:     pimenrich/templates/variant-group/tab/properties/general.html
-        pim/template/variant-group/form/no-attribute:          pimenrich/templates/variant-group/form/no-attribute.html
+        pim/template/menu/tab:                               pimenrich/templates/menu/tab.html
+        pim/template/menu/item:                              pimenrich/templates/menu/item.html
+        pim/template/header/header:                          pimenrich/templates/header/header.html
+        pim/template/header/logo:                            pimenrich/templates/header/logo.html
+        pim/template/header/user:                            pimenrich/templates/header/user.html
+        pim/template/app:                                    pimenrich/templates/app.html
+        pim/template/header/flash:                           pimenrich/templates/header/flash.html
 
-        pim/template/group/tab/properties/general:     pimenrich/templates/group/tab/properties/general.html
-        pim/template/group/meta/product-count:         pimenrich/templates/group/meta/product-count.html
+        pim/template/variant-group/tab/properties/general:   pimenrich/templates/variant-group/tab/properties/general.html
+        pim/template/variant-group/form/no-attribute:        pimenrich/templates/variant-group/form/no-attribute.html
+
+        pim/template/group/tab/properties/general:           pimenrich/templates/group/tab/properties/general.html
+        pim/template/group/meta/product-count:               pimenrich/templates/group/meta/product-count.html
+
+        pim/template/create/tab/properties/general:          pimenrich/templates/create/tab/properties/general.html
 
         # Exports
         pim/template/export/product/edit/content:                               pimenrich/templates/export/product/edit/content.html
@@ -612,11 +942,9 @@ config:
         pim/template/export/common/edit/validation:                             pimenrich/templates/export/common/edit/validation.html
         pim/template/export/common/edit/launch:                                 pimenrich/templates/export/common/edit/launch.html
         pim/template/export/common/edit/upload:                                 pimenrich/templates/export/common/edit/upload.html
-        pim/template/export/common/edit/upload-launch:                          pimenrich/templates/export/common/edit/upload-launch.html
 
         # Filters
         pim/template/filter/filter:                     pimenrich/templates/filter/filter.html
-        pim/template/filter/text:                       pimenrich/templates/filter/text.html
         pim/template/filter/simpleselect:               pimenrich/templates/filter/simpleselect.html
         pim/template/filter/product/family:             pimenrich/templates/filter/product/family.html
         pim/template/filter/product/enabled:            pimenrich/templates/filter/product/enabled.html
@@ -636,12 +964,8 @@ config:
 
         # Grid view selector
         pim/template/grid/view-selector: pimenrich/templates/grid/view-selector.html
-        pim/template/grid/view-selector/footer: pimenrich/templates/grid/view-selector-footer.html
-        pim/template/grid/view-selector/footer/create: pimenrich/templates/grid/view-selector-footer-create.html
-        pim/template/grid/view-selector/footer/create-dropdown-item: pimenrich/templates/grid/view-selector-footer-create-dropdown-item.html
         pim/template/grid/view-selector/create-view-label-input: pimenrich/templates/grid/view-selector-create-view-label-input.html
         pim/template/grid/view-selector/line: pimenrich/templates/grid/view-selector-line.html
-        pim/template/grid/view-selector/line/remove: pimenrich/templates/grid/view-selector-line-remove.html
         pim/template/grid/view-selector/create-view: pimenrich/templates/grid/view-selector-create-view.html
         pim/template/grid/view-selector/save-view: pimenrich/templates/grid/view-selector-save-view.html
         pim/template/grid/view-selector/remove-view: pimenrich/templates/grid/view-selector-remove-view.html

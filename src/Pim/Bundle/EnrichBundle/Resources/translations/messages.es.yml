@@ -269,9 +269,8 @@ pim_enrich:
         label: Seleccione el tipo de información de referencia
 attribute:
   title: atributo
-  overview: Lista de atributos
-  create: Crear atributo
   edit: editar atributo
+  create: Crear atributo
 attribute group:
   title: grupo de atributos
   overview: resumen de grupo de atributo
@@ -299,17 +298,13 @@ channel:
   edit: editar canal
 currency:
   title: moneda
-  overview: resumen de moneda
   create: crear moneda
   edit: editar moneda
 family:
   title: familia
-  overview: familia resumen
-  create: crear familia
   edit: editar familia
 locale:
   title: configuración regional
-  overview: resumen de configuración regional
   create: crear local
   edit: editar configuración de local
 product:
@@ -319,18 +314,12 @@ product:
   edit: editar productos
 group:
   title: grupo
-  overview: resumen de grupo
-  create: crear grupo
   edit: editar un grupo
 group type:
   title: tipo de grupo
-  overview: resumen de grupo tipo
-  create: crear tipo de grupo
   edit: editar tipo de grupo
 variant group:
   title: grupo de variantes
-  overview: resumen de grupo de variantes
-  create: crear un grupo de variante
   edit: Editar un grupo de variante
 association type:
   title: tipo de asociación
@@ -538,7 +527,7 @@ Attributetype: Tipo de atributo
 Attribute type: Tipo de atributo
 Defaultvalue: Valor predefinido
 Variant: Variante
-Smart: Inteligente
+Smart: Atributo inteligente
 Useable as grid column: Se puede usar como columna de grilla
 Useable as grid filter: Se puede usar en la grilla
 Family: Familia
@@ -733,25 +722,6 @@ Current tab: Pestaña actual
 Group: Grupo
 View group: Ver grupo
 Products: Productos
-pim_menu:
-  tab:
-    collect: Colectar
-    enrich: Enriquecer
-    settings: Configuración
-    spread: Distribuir
-  item:
-    association_type: Tipos de asociaciones
-    attribute: Atributos
-    attribute_group: Grupos de atributos
-    category: Categorías
-    channel: Canales
-    currency: Monedas
-    family: Familias
-    group: Grupos
-    group_type: Tipos de grupo
-    locale: Locales
-    product: Productos
-    variant_group: Grupos de variantes
 Properties: Propiedades
 History: Histórico
 pane.accordion:
@@ -905,6 +875,8 @@ pim_enrich_attribute_form:
   code: Código
   type: Tipo de atributo
   reference_data_name: Nombre de datos de referencia
+  scopable: Valor por canal
+  localizable: Valor por local
   unique: Valor único
   availableLocales: Locales disponibles
   locale_specific: Local específico

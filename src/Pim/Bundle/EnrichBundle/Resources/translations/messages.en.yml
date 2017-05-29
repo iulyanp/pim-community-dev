@@ -302,9 +302,8 @@ pim_enrich:
 # Entity and page header titles
 attribute:
     title:    attribute
-    overview: attribute overview
-    create:   create attribute
     edit:     edit attribute
+    create:   create attribute
 attribute group:
     title:    attribute group
     overview: attribute group overview
@@ -333,17 +332,13 @@ channel:
     edit:     edit channel
 currency:
     title:    currency
-    overview: currency overview
     create:   create currency
     edit:     edit currency
 family:
     title:    family
-    overview: family overview
-    create:   create family
     edit:     edit family
 locale:
     title:    locale
-    overview: locale overview
     create:   create locale
     edit:     edit locale
 product:
@@ -353,18 +348,12 @@ product:
     edit:     edit product
 group:
     title:    group
-    overview: group overview
-    create:   create group
     edit:     edit group
 group type:
     title:    group type
-    overview: group type overview
-    create:   create group type
     edit:     edit group type
 variant group:
     title:    variant group
-    overview: variant group overview
-    create:   create variant group
     edit:     edit variant group
 association type:
     title:    association type
@@ -832,27 +821,6 @@ Current tab: Current tab
 Group: Group
 View group: View group
 Products: Products
-
-# Menu entries
-pim_menu:
-    tab:
-        collect: Collect
-        enrich: Enrich
-        settings: Settings
-        spread: Spread
-    item:
-        association_type: Association types
-        attribute: Attributes
-        attribute_group: Attribute groups
-        category: Categories
-        channel: Channels
-        currency: Currencies
-        family: Families
-        group: Groups
-        group_type: Group types
-        locale: Locales
-        product: Products
-        variant_group: Variant groups
 
 # Tabs
 Properties: Properties

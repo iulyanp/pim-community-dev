@@ -36,6 +36,8 @@ flash:
     removed: Verbindungstyp erfolgreich gelöscht
   attribute:
     removed: Attribut erfolgreich entfernt
+  attribute_group:
+    removed: Attributgruppe erfolgreich entfernt
   family:
     removed: Produktfamilie erfolgreich entfernt
   product:
@@ -206,6 +208,9 @@ pim_enrich:
           family: Wählen Sie eine Produktfamilie
           save: Speichern
           cancel: Abbrechen
+    attribute:
+      scopable: Je Ausgabekanal individualisierbar
+      global: Global
     association_type:
       info:
         deletion_successful: Verbindungstyp erfolgreich entfernt.
@@ -225,6 +230,10 @@ pim_enrich:
       title: Verbindungstyp
     group_type:
       info:
+        deletion_successful: Gruppentyp erfolgreich gelöscht.
+        deletion_failed: Gruppentyp konnte nicht gelöscht werden.
+        update_successful: Gruppentyp erfolgreich aktualisiert.
+        update_failed: Der Gruppentyp konnte nicht aktualisiert werden.
         field_not_ready:
           The group type cannot be saved right now. The following fields are not ready:
             - Felder
@@ -270,6 +279,21 @@ pim_enrich:
         updated_by: Aktualisiert von
       btn:
         save: Speichern
+    attribute_label:
+      pim_catalog_identifier: Kennung
+      pim_catalog_text: Text
+      pim_catalog_textarea: Textbereich
+      pim_catalog_number: Nummer
+      pim_catalog_price_collection: Preis
+      pim_catalog_multiselect: Mehrfachauswahl
+      pim_catalog_simpleselect: Einfachauswahl
+      pim_catalog_file: Datei
+      pim_catalog_image: Abbildung
+      pim_catalog_boolean: "Ja/Nein"
+      pim_catalog_date: Datum
+      pim_catalog_metric: Maßeinheit
+      pim_reference_data_simpleselect: Referenz-Datentyp Einfachauswahl
+      pim_reference_data_multiselect: Referenz-Datentyp Mehrfachauswahl
     attribute_option:
       code: Code
       label: Bezeichnung
@@ -317,6 +341,9 @@ pim_enrich:
       info:
         update_failed: Das Job-Profil konnte nicht aktualisiert werden.
         update_successful: Das Job-Profil wurde erfolgreich aktualisiert.
+    attribute_group:
+      info:
+        update_successful: Attributgruppe erfolgreich aktualisiert
   confirmation:
     leave: Möchten Sie diese Seite wirklich verlassen?
     discard_changes: Änderungen an {{ entity }} gehen verloren, wenn Sie die Seite verlassen.
@@ -330,7 +357,7 @@ pim_enrich:
   error:
     upload: Während des Hochladens der Datei ist ein Fehler aufgetreten
   alert:
-    not_allowed: Sie haben keine Berechtigung für diese Seite
+    not_allowed: Sie haben keine Berechtigung, diese Seite anzuzeigen
     error_occured: Während des Ladens der Seite ist ein Fehler aufgetreten
   form:
     required: (erforderlich)
@@ -351,6 +378,7 @@ pim_enrich:
           info:
             search_attributes: Suche...
             no_available_attributes: Es können keine weiteren Attribute hinzugefügt werden
+            attributes_selected: "{{ itemsCount }} Attribut(e) ausgewählt"
             no_match: Keine Treffer gefunden
             load_more: Weitere Ergebnisse werden geladen...
         categories:
@@ -479,6 +507,21 @@ pim_enrich:
           title: Historie
         products:
           title: Produkte
+    attribute_group:
+      tab:
+        properties:
+          title: Eigenschaften
+          general: Allgemeine Eigenschaften
+          code: Code
+          label_translations: Feldbezeichner-Übersetzungen
+        attribute:
+          title: Attribute
+          table:
+            name: Name
+            type: Typ
+            scope: Gültigkeitsbereich
+            localizable: Lokalisierbar
+        history.title: Historie
     common:
       tab:
         attributes:
@@ -490,12 +533,15 @@ pim_enrich:
             no_available_attributes: Es können keine weiteren Attribute hinzugefügt werden
     job_execution:
       loading: Lädt...
+      title.details: Ausführungsdetails
       refreshBtn.title: Aktualisieren
       meta:
         status.title: Status
       button:
         show_profile.title: Profil anzeigen
         download_log.title: Log herunterladen
+        download_file.title: Generierte Datei herunterladen
+        download_archive.title: Generiertes Archiv herunterladen
       summary:
         fetching: Sammle Daten zur Ausführung des Jobs...
         warning: Warnung
@@ -659,7 +705,6 @@ pim_enrich:
           help: Verwenden Sie die Produktkategorien im Strukturbaum (definiert durch den Ausgabekanal oben) um die Produkte für den Export zu selektieren
         identifier:
           title: Kennung
-          help: Identifikator der Produkte die Sie exportieren möchten, getrennt durch Kommas, Leerzeichen oder Zeilenumbrüche
         metric:
           operators:
             "=": Ist gleich
@@ -731,8 +776,93 @@ pim_enrich:
   mass_edit_action:
     edit_common_attributes:
       description: Die ausgewählten Produktattribute werden für die folgenden Daten des Gebietsschemas <span class="bold-purple">{{ locale }}</span> und dem Ausgabekanal <span class="bold-purple">{{ channel }}</span>, welche in der Produktübersicht ausgewählt sind, bearbeitet.
+  index:
+    association_type:
+      title: Verbindungstypen-Übersicht
+      create_btn: Verbindungstyp anlegen
+    import_profiles:
+      title: Übersicht Importprofil
+      create_btn: Importprofil anlegen
+    import_history:
+      title: Importberichte
+    variant_group:
+      title: Übersicht Variantengruppe
+      create_btn: Variantengruppe anlegen
+    group:
+      title: Übersicht Gruppe
+      create_btn: Gruppe anlegen
+    export_profiles:
+      title: Übersicht Exportprofil
+      create_btn: Exportprofil anlegen
+    export_history:
+      title: Exportberichte
+    family:
+      title: Übersicht Produktfamilie
+      create_btn: Produktfamilie anlegen
+    grouptype:
+      title: Übersicht Gruppentyp
+      create_btn: Gruppentyp anlegen
+    currency:
+      title: Übersicht Währung
+    locale:
+      title: Übersicht Gebietsschema
+    user:
+      title: Benutzer
+      create_btn: Benutzer anlegen
+    user_role:
+      title: Rolle
+      create_btn: Rolle anlegen
+    user_group:
+      title: Gruppen
+      create_btn: Gruppe anlegen
+    process_tracker:
+      title: Prozess-Tracker
+    channel:
+      title: Übersicht Ausgabekanäle
+      create_btn: Ausgabekanal anlegen
+    attribute:
+      title: Attribute Übersicht
+      create_btn: Attribut anlegen
+      modal_title: Wählen Sie den Attributtyp aus
+    attribute_group:
+      create_btn: Anlegen
 pim_enrich.error:
   exception.title: Oh nein! Ein {{ status_code }} Fehler ist aufgetreten...
+  http:
+    403: Sie haben keine Berechtigung, diese Seite anzuzeigen
+page_title:
+  oro_default: Dashboard
+  pim_enrich_attributegroup_index: Attributgruppen
+  pim_enrich_attributegroup_create: Attributgruppen | Anlegen
+  pim_enrich_attributegroup_edit: Attributgruppen {{ group.label }} | Bearbeiten
+  pim_enrich_categorytree_index: Kategorie-Strukturbäume
+  pim_enrich_categorytree_create: Kategorie-Strukturbäume | Anlegen
+  pim_enrich_categorytree_create_tree: Kategorie-Strukturbäume | Anlegen
+  pim_enrich_attribute_index: Attribute
+  pim_enrich_attribute_create: Attribute | Anlegen
+  pim_enrich_attribute_edit: Attribute {{ attribute.label }} | Bearbeiten
+  pim_enrich_product_index: Produkte
+  pim_enrich_product_edit: Produkte {{ product.sku }} | Bearbeiten
+  pim_enrich_family_index: Produktfamilien
+  pim_enrich_family_edit: Produktfamilien {{ family.label }} | Bearbeiten
+  pim_enrich_channel_index: Ausgabekanäle
+  pim_enrich_channel_create: Ausgabekanäle | Anlegen
+  pim_enrich_channel_edit: Ausgabekanäle {{ channel.label }} | Bearbeiten
+  pim_enrich_currency_index: Währungen
+  pim_enrich_locale_index: Gebietsschemata
+  pim_enrich_group_index: Gruppen
+  pim_enrich_group_edit: Gruppen {{ group.label }} | Bearbeiten
+  pim_enrich_variant_group_index: Variantengruppen
+  pim_enrich_variant_group_edit: Variantengruppen {{ group.label }} | Bearbeiten
+  pim_enrich_associationtype_index: Verbindungstypen
+  pim_enrich_associationtype_edit: Verbindungstypen {{ association type.label }} | Bearbeiten
+  pim_enrich_grouptype_index: Gruppentypen
+  pim_enrich_grouptype_edit: Gruppentypen {{ group type.label }} | Bearbeiten
+  pim_enrich_mass_edit_action_choose: Massenbearbeitung | Auswählen
+  pim_enrich_mass_edit_action_configure: Massenbearbeitung | Konfigurieren
+  pim_enrich_mass_edit_action_perform: Massenbearbeitung | Durchführen
+  pim_enrich_job_tracker_index: Prozess-Tracker
+  pim_enrich_job_tracker_show: Prozess-Tracker | Job anzeigen
 batch_jobs:
   add_product_value:
     label: Produktwert hinzufügen
@@ -752,7 +882,67 @@ batch_jobs:
     label: Benötigte Attribute auswählen
     perform:
       label: Benötigte Attribute auswählen
+  csv_product_quick_export:
+    quick_export.label: CSV Produkt-Schnellexport
+    perform:
+      label: CSV Produkt-Schnellexport
+  csv_product_grid_context_quick_export:
+    quick_export.label: CSV Produkt-Schnellexport kontextabhängig
+    perform:
+      label: CSV Produkt-Schnellexport kontextabhängig
+  xlsx_product_quick_export:
+    quick_export.label: XLSX Produkt-Schnellexport
+    perform:
+      label: XLSX Produkt-Schnellexport
+  xlsx_product_grid_context_quick_export:
+    quick_export.label: XLSX Produkt-Schnellexport kontextabhängig
+    perform:
+      label: XLSX Produkt-Schnellexport kontextabhängig
   add_to_variant_group:
     label: Zu einer Variantengruppe hinzufügen
     perform:
       label: Zu einer Variantengruppe hinzufügen
+job_tracker:
+  download_archive:
+    archive: Generiertes Archiv herunterladen
+    output: Generierte Datei herunterladen
+    input: Eingelesene Datei herunterladen
+    invalid_xlsx: Ungültige Daten herunterladen
+    invalid_csv: Ungültige Daten herunterladen
+pim_menu:
+  tab:
+    collect: Sammeln
+    enrich: Anreichern
+    settings: Einstellungen
+    system: System
+    spread: Ausleiten
+  item:
+    association_type: Verbindungstypen
+    attribute: Attribute
+    attribute_group: Attributgruppen
+    category: Kategorien
+    channel: Ausgabekanäle
+    currency: Währungen
+    family: Produktfamilien
+    group: Gruppen
+    group_type: Gruppentypen
+    locale: Gebietsschemata
+    product: Produkte
+    variant_group: Variantengruppen
+    export_history: Export-Historie
+    export_profile: Export-Profile
+    import_history: Import-Historie
+    import_profile: Import-Profile
+    configuration: Konfiguration
+    user_management: Benutzerverwaltung
+    user: Benutzer
+    user_group: Gruppen
+    user_role: Rollen
+    info: Systeminformationen
+    job_tracker: Prozess-Tracker
+pim_header:
+  user:
+    logout: Abmelden
+    user_account: Mein Konto
+pim_notification:
+  mark_all_as_read: Alle als gelesen markieren

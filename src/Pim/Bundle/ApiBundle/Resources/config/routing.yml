@@ -10,6 +10,10 @@ attribute:
     resource: '@PimApiBundle/Resources/config/routing/attribute.yml'
     prefix: /rest/v1
 
+attribute_group:
+    resource: '@PimApiBundle/Resources/config/routing/attribute_group.yml'
+    prefix: /rest/v1
+
 channel:
     resource: '@PimApiBundle/Resources/config/routing/channel.yml'
     prefix: /rest/v1
@@ -24,6 +28,10 @@ product:
 
 media:
     resource: '@PimApiBundle/Resources/config/routing/media.yml'
+    prefix: /rest/v1
+
+currency:
+    resource: '@PimApiBundle/Resources/config/routing/currency.yml'
     prefix: /rest/v1
 
 fos_oauth_server_token:

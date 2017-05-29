@@ -37,18 +37,10 @@ pim_title.import_execution.index: Importverwerkingen geschiedenis
 pim_title.import_execution.show: Importverwerkingen | Details
 export profile:
   title: Profiel exporteren
-  overview: exportprofiel overzicht
-  create: exportprofiel toevoegen
   edit: exportprofiel bewerken
-export report:
-  overview: Exporteer rapporten
 import profile:
   title: Profiel importeren
-  overview: importprofiel overzicht
-  create: importprofiel toevoegen
   edit: importprofiel bewerken
-import report:
-  overview: Importeer rapporten
 pim_importexport:
   acl:
     export_profile:
@@ -106,12 +98,6 @@ flash:
     removed: De import is verwijderd
     updated: De import is succesvol bijgewerkt
     running: De import is bezig
-pim_menu:
-  item:
-    export_history: Exportgeschiedenis
-    export_profile: Exportprofielen
-    import_history: Importgeschiedenis
-    import_profile: Importprofielen
 General properties: Algemene eigenschappen
 History: Geschiedenis
 pane.accordion:

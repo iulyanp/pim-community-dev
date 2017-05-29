@@ -46,18 +46,10 @@ pim_title.import_execution.index: Histórico de execuções de importação
 pim_title.import_execution.show: Execuções de importação | Detalhes
 export profile:
   title: perfil de exportação
-  overview: visão geral do perfil de exportação
-  create: criar perfil de exportação
   edit: editar perfil de exportação
-export report:
-  overview: relatórios de exportação
 import profile:
   title: perfil de importação
-  overview: visão geral do perfil de importação
-  create: criar perfil de importação
   edit: editar perfil de importação
-import report:
-  overview: relatórios de importação
 pim_importexport:
   acl:
     export_profile:
@@ -111,12 +103,6 @@ flash:
     removed: A importação foi removida
     updated: A importação foi atualizada com sucesso
     running: A importação está a ser executada
-pim_menu:
-  item:
-    export_history: Histórico de exportações
-    export_profile: Perfis de exportação
-    import_history: Histórico de importações
-    import_profile: Perfis de importação
 General properties: Propriedades gerais
 History: Histórico
 pane.accordion:

@@ -36,6 +36,8 @@ flash:
     removed: Tipo de associação removido com sucesso
   attribute:
     removed: Atributo removido com sucesso
+  attribute_group:
+    removed: Grupo de atributos removido com sucesso
   family:
     removed: Família removida com sucesso
   product:
@@ -57,6 +59,8 @@ flash:
   role:
     removed: Função removida com sucesso
 error:
+  creating:
+    product: Nenhum atributo está configurado como um identificador de produto ou você não tem os direitos para editá-lo.
   removing:
     item: Não é possível excluir este item
     association_type: Não é possível excluir este tipo de associação
@@ -200,8 +204,15 @@ pim_enrich:
           family: Escolha uma família
           save: Salvar
           cancel: Cancelar
+    attribute:
+      scopable: Com escopo definível
+      global: Global
     association_type:
       info:
+        deletion_successful: Tipo de associação excluído com êxito.
+        deletion_failed: Tipo de associação não pode ser excluído.
+        update_successful: Tipo de associação atualizado com sucesso.
+        update_failed: O tipo de associação não pôde ser atualizado.
         field_not_ready:
           The association type cannot be saved right now. The following fields are not ready:
             - campos
@@ -225,6 +236,12 @@ pim_enrich:
     channel:
       title: canal
       info:
+        deletion_successful: Canal excluído com êxito.
+        deletion_failed: Canal não pode ser excluído.
+        update_successful: Canal atualizado com sucesso.
+        update_failed: O canal não pôde ser atualizado.
+        create_successful: Canal criado com êxito.
+        create_failed: O canal não pôde ser criado.
         field_not_ready:
           The channel cannot be saved right now. The following fields are not ready:
             - campos
@@ -235,11 +252,29 @@ pim_enrich:
         save: Salvar
     family:
       title: família
+      info:
+        create_successful: Canal criado com êxito.
+        update_failed: Ocorreu um erro durante a atualização de família.
       meta:
         created: Criado
         updated: Atualizado
       btn:
         save: Salvar
+    attribute_label:
+      pim_catalog_identifier: Identificador
+      pim_catalog_text: Texto
+      pim_catalog_textarea: Área de texto
+      pim_catalog_number: Número
+      pim_catalog_price_collection: Preço
+      pim_catalog_multiselect: Seleção múltipla
+      pim_catalog_simpleselect: Seleção simples
+      pim_catalog_file: Arquivo
+      pim_catalog_image: Imagem
+      pim_catalog_boolean: "Sim/Não"
+      pim_catalog_date: Data
+      pim_catalog_metric: Métrico
+      pim_reference_data_simpleselect: Selecione os dados de referência simples
+      pim_reference_data_multiselect: Referência de dados multi selecionáveis
     attribute_option:
       code: Código
       label: Rótulo
@@ -261,6 +296,10 @@ pim_enrich:
     group:
       title: Grupo
       info:
+        deletion_successful: Grupo excluído com sucesso.
+        deletion_failed: Grupo não pode ser excluído.
+        update_successful: Grupo atualizado com sucesso.
+        update_failed: O grupo não pôde ser atualizado.
         field_not_ready:
           The group cannot be saved right now. The following fields are not ready:
             - campos
@@ -270,6 +309,14 @@ pim_enrich:
         product_count: Produtos
         created: Criado
         updated: Atualizado
+    job_instance:
+      title: perfil de trabalho
+      info:
+        update_failed: O perfil de trabalho não pôde ser atualizado.
+        update_successful: O perfil de trabalho foi atualizado com sucesso.
+    attribute_group:
+      info:
+        update_successful: Grupo de atributos atualizado com sucesso
   confirmation:
     leave: Tem certeza de que deseja sair desta página?
     discard_changes: Você perderá as alterações feitas em %entity% se sair dessa página.
@@ -283,7 +330,6 @@ pim_enrich:
   error:
     upload: Ocorreu um erro durante o envio do ficheiro
   alert:
-    not_allowed: Não tem autorização para aceder a esta página
     error_occured: Ocorreu um erro durante o carregamento da página
   form:
     required: (Obrigatório)
@@ -430,6 +476,21 @@ pim_enrich:
           title: Histórico
         products:
           title: Produtos
+    attribute_group:
+      tab:
+        properties:
+          title: Propriedades
+          general: Propriedades gerais
+          code: Código
+          label_translations: Traduções do rótulo
+        attribute:
+          title: Atributos
+          table:
+            name: Nome
+            type: Tipo
+            scope: Escopo
+            localizable: Localizável
+        history.title: Histórico
     common:
       tab:
         attributes:
@@ -457,6 +518,12 @@ pim_enrich:
         header.start: Iniciar
         header.end: Fim
     job_instance:
+      fail:
+        launch: Falha ao iniciar o perfil de trabalho. Certifique-se que é válido e que você tem direito a lançá-lo.
+        save: Falha ao salvar o perfil de trabalho. Certifique-se de que você tem direito de editá-lo.
+      title:
+        import: Importar perfil
+        export: Exportar Perfil
       button:
         edit.title: Editar
         export.title: Exportar Agora
@@ -639,8 +706,49 @@ pim_enrich:
   mass_edit_action:
     edit_common_attributes:
       description: Os atributos dos produtos selecionados serão editados com os seguintes dados para a linguagem <span class="highlight">{{ locale }}</span> e o canal <span class="highlight">{{ channel }}</span>, escolhidos na grelha de produtos.
+  index:
+    group:
+      create_btn: Criar grupo
+    user:
+      title: Usuário
+      create_btn: Criar usuário
+    user_role:
+      title: Função
+      create_btn: Criar papel
+    user_group:
+      title: Grupos
+      create_btn: Criar grupo
+    process_tracker:
+      title: Visualizador de processos
+    attribute:
+      modal_title: Escolher tipo de atributo
+    attribute_group:
+      create_btn: Criar
 pim_enrich.error:
   exception.title: Oh snap! Um {{ status_code }} erro aconteceu...
+page_title:
+  oro_default: Painel de controle
+  pim_enrich_attributegroup_index: Grupo de atributos
+  pim_enrich_attributegroup_create: Grupo de atributos | Criar
+  pim_enrich_categorytree_index: Árvores de categorias
+  pim_enrich_categorytree_create: Árvores de categoria | Criar
+  pim_enrich_categorytree_create_tree: Árvores de categoria | Criar
+  pim_enrich_attribute_index: Atributos
+  pim_enrich_attribute_create: Atributos | Criar
+  pim_enrich_product_index: Produtos
+  pim_enrich_family_index: Famílias
+  pim_enrich_channel_index: Canais
+  pim_enrich_channel_create: Canais | Criar
+  pim_enrich_currency_index: Moedas
+  pim_enrich_locale_index: Localidades
+  pim_enrich_group_index: Grupos
+  pim_enrich_variant_group_index: Grupos de variantes
+  pim_enrich_associationtype_index: Tipos de associação
+  pim_enrich_grouptype_index: Tipos de grupos
+  pim_enrich_mass_edit_action_choose: Edição em massa | Escolher
+  pim_enrich_mass_edit_action_configure: Edição em massa | Configurar
+  pim_enrich_job_tracker_index: Visualizador de processos
+  pim_enrich_job_tracker_show: Visualizador de processos | Mostrar tarefa
 batch_jobs:
   update_product_value:
     label: Atualizar o valor do produto
@@ -660,3 +768,40 @@ batch_jobs:
     label: Adicionar a grupo variante
     perform:
       label: Adicionar a grupo variante
+pim_menu:
+  tab:
+    collect: Importar
+    enrich: Atualizar
+    settings: Configurações
+    system: Sistema
+    spread: Exportar
+  item:
+    association_type: Tipos de associação
+    attribute: Atributos
+    attribute_group: Grupo de atributos
+    category: Categorias
+    channel: Canais
+    currency: Moedas
+    family: Famílias
+    group: Grupos
+    group_type: Tipos de grupos
+    locale: Localidades
+    product: Produtos
+    variant_group: Grupos de variantes
+    export_history: Histórico de exportações
+    export_profile: Perfis de exportação
+    import_history: Histórico de importações
+    import_profile: Perfis de importação
+    configuration: Configuração
+    user_management: Gerenciamento de usuários
+    user: Usuários
+    user_group: Grupos
+    user_role: Funções
+    info: Informações do Sistema
+    job_tracker: Visualizador de processos
+pim_header:
+  user:
+    logout: Sair
+    user_account: Minha Conta
+pim_notification:
+  mark_all_as_read: Marca todas como lida

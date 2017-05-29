@@ -570,12 +570,24 @@ class AssertionContext extends RawMinkContext
      */
     public function iShouldHaveNewNotification($count)
     {
-        $actualCount = (int) $this->getCurrentPage()->find('css', '.AknBell-countContainer')->getText();
+        $this->spin(function () use ($count) {
+            $countContainer = $this->getCurrentPage()->find('css', '.AknBell-countContainer');
 
-        assertEquals(
-            $actualCount,
-            $count,
-            sprintf('Expecting to see %d new notifications, saw %d', $count, $actualCount)
+            if (!$countContainer) {
+                return false;
+            }
+            $actualCount = (int) $countContainer->getText();
+
+            assertEquals(
+                $actualCount,
+                $count,
+                sprintf('Expecting to see %d new notifications, saw %d', $count, $actualCount)
+            );
+
+            return true;
+        }, sprintf(
+            'Expecting to see %d new notifications',
+            $count)
         );
     }
 
@@ -585,14 +597,22 @@ class AssertionContext extends RawMinkContext
     public function iOpenTheNotificationPanel()
     {
         $notificationWidget = $this->spin(function () {
-            return $this->getCurrentPage()->find('css', '#header-notification-widget');
-        }, 'Cannot find "#header-notification-widget" notification panel');
+            return $this->getCurrentPage()->find('css', '.AknHeader-rightMenus .notification');
+        }, 'Cannot find the link to the notification widget');
 
         if ($notificationWidget->hasClass('open')) {
             return;
         }
 
-        $notificationWidget->find('css', '.dropdown-toggle')->click();
+        $this->spin(function () use ($notificationWidget) {
+            $toggle = $notificationWidget->find('css', '.dropdown-toggle');
+
+            if (null !== $toggle && $toggle->isVisible()) {
+                $toggle->click();
+
+                return true;
+            }
+        }, 'Can not find the dropdown notification toggle');
 
         // Wait for the footer of the notification panel dropdown to be loaded
         $this->spin(function () {
@@ -631,8 +651,8 @@ class AssertionContext extends RawMinkContext
         $this->iOpenTheNotificationPanel();
 
         $notificationWidget = $this->spin(function () {
-            return $this->getCurrentPage()->find('css', '#header-notification-widget');
-        }, 'Cannot find "#header-notification-widget" notification widget');
+            return $this->getCurrentPage()->find('css', '.AknHeader-rightMenus .notification');
+        }, 'Cannot find the link to the notification widget');
 
         $icons = [
             'success' => 'icon-ok',
@@ -748,5 +768,19 @@ class AssertionContext extends RawMinkContext
     protected function replacePlaceholders($value)
     {
         return $this->getMainContext()->getSubcontext('fixtures')->replacePlaceholders($value);
+    }
+
+    /**
+     * @When /^(?:|I )should see "([^"]*)" in popup$/
+     *
+     * @param string $message The message.
+     *
+     * @return bool
+     */
+    public function assertPopupMessage($message)
+    {
+        return $this->spin(function () use ($message) {
+            return $message == $this->getSession()->getDriver()->getWebDriverSession()->getAlert_text();
+        }, sprintf('Cannot assert that the modal contains %s', $message));
     }
 }

@@ -28,20 +28,6 @@ extensions:
         config:
             backUrl: pim_enrich_channel_index
 
-    pim-channel-create-form-delete:
-        module: pim/channel-edit-form/delete
-        parent: pim-channel-create-form
-        targetZone: buttons
-        aclResourceId: pim_enrich_channel_remove
-        position: 100
-        config:
-            trans:
-                title: confirmation.remove.channel
-                content: pim_enrich.confirmation.delete_item
-                success: flash.channel.removed
-                fail: error.removing.channel
-            redirect: pim_enrich_channel_index
-
     pim-channel-create-form-save-buttons:
         module: pim/form/common/save-buttons
         parent: pim-channel-create-form
@@ -52,7 +38,7 @@ extensions:
         module: pim/channel-edit-form/save
         parent: pim-channel-create-form
         targetZone: buttons
-        position: 0
+        position: 100
         config:
             redirectUrl: pim_enrich_channel_edit
 
@@ -91,10 +77,13 @@ extensions:
             label: 'pim_enrich.form.channel.tab.properties.title'
 
     pim-channel-create-form-properties-general:
-        module: pim/channel-edit-form/properties/general
+        module: pim/create/properties/general
         parent: pim-channel-create-form-properties
         targetZone: accordion
         position: 100
+        config:
+            title: pim_enrich.form.channel.tab.properties.general
+            codeLabel: pim_enrich.form.channel.tab.properties.code
 
     pim-channel-create-form-properties-general-currencies:
         module: pim/channel-edit-form/properties/general/currencies

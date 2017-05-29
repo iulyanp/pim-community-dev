@@ -269,9 +269,8 @@ pim_enrich:
         label: Escolha o tipo de dados de referência
 attribute:
   title: atributo
-  overview: visão geral de atributos
-  create: criar atributo
   edit: editar atributo
+  create: criar atributo
 attribute group:
   title: grupo de atributos
   overview: visão geral de grupo de atributo
@@ -299,17 +298,13 @@ channel:
   edit: editar canal
 currency:
   title: moeda
-  overview: visão geral de moeda
   create: criar moeda
   edit: editar moeda
 family:
   title: família
-  overview: visão geral de família
-  create: criar família
   edit: editar família
 locale:
   title: linguagem
-  overview: visão geral de linguagem
   create: criar linguagem
   edit: editar linguagem
 product:
@@ -319,18 +314,12 @@ product:
   edit: editar produto
 group:
   title: grupo
-  overview: visão geral do grupo
-  create: criar grupo
   edit: editar grupo
 group type:
   title: tipo de grupo
-  overview: visão geral do tipo de grupo
-  create: criar o tipo de grupo
   edit: editar o tipo de grupo
 variant group:
   title: grupo variante
-  overview: visão geral do grupo variante
-  create: criar grupo variante
   edit: editar grupo variante
 association type:
   title: tipo de associação
@@ -732,25 +721,6 @@ Current tab: Separador atual
 Group: Grupo
 View group: Visualizar grupo
 Products: Produtos
-pim_menu:
-  tab:
-    collect: Recolher
-    enrich: Enriquecer
-    settings: Preferências
-    spread: Propagação
-  item:
-    association_type: Tipos de associação
-    attribute: Atributos
-    attribute_group: Grupos de atributos
-    category: Categorias
-    channel: Canais
-    currency: Moedas
-    family: Famílias
-    group: Grupos
-    group_type: Tipos de grupo
-    locale: Linguagens
-    product: Produtos
-    variant_group: Grupos variantes
 Properties: Propriedades
 History: Histórico
 pane.accordion:
